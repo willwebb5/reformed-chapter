@@ -7,7 +7,7 @@ export default function Intro() {
         maxWidth: "700px",
         marginLeft: "auto",
         marginRight: "auto",
-        padding: "1rem 1rem",
+        padding: ".75rem .75rem",
         background: "#d9c48c", // white background
         color: "#111",
         border: "2px solid white", // main black border

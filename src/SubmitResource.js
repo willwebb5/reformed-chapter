@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Header from "./Header";
+import Header from './Header/Header';
 import { createClient } from "@supabase/supabase-js";
 
 const resourceTypes = ["Sermon", "Commentary", "Devotional", "Video", "Book"];

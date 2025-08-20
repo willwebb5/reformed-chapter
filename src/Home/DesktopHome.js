@@ -1,110 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { createClient } from '@supabase/supabase-js';
-import Header from "./Header";
-import LoadingScreen from './LoadingScreen';
-import { typeLabels, bibleBooks, exampleAuthors, resourceTypes } from './Constants';
-import SortFilter from './SortFilter';
-import Intro from "./Intro";
-
-// Scripture sort for one chapter
-function sortByVerse(a, b) {
-  const getFirstVerse = (str) => {
-    if (!str) return 0;
-    const match = str.match(/:(\d+)/); // first verse number after colon
-    return match ? parseInt(match[1], 10) : 0;
-  };
-
-  const verseA = getFirstVerse(a.scripture);
-  const verseB = getFirstVerse(b.scripture);
-
-  return verseA - verseB;
-}
-
-// Supabase configuration
-const supabaseUrl = 'https://bnprkjidihxgcubkounq.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJucHJramlkaWh4Z2N1YmtvdW5xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2ODA2MDQsImV4cCI6MjA2ODI1NjYwNH0.NbgwVGFPo6qDOOxIdXZQ_uaxkV7qYpo8kkH7ICFp0kQ';
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Helper function to normalize book names
-const normalizeBookName = (name) => {
-  return name.toLowerCase()
-    .replace(/^(\d+)\s*/, '$1 ') // Ensure space after numbers like "1 Corinthians"
-    .replace(/\s+/g, ' ')       // Normalize multiple spaces
-    .trim();
-};
-
-// Parse secondary scripture references
-const parseSecondaryScripture = (secondaryScripture, currentBook, currentChapter) => {
-  if (!secondaryScripture) return false;
-  
-  console.log(`\n--- Parsing secondary scripture ---`);
-  console.log(`Input: "${secondaryScripture}"`);
-  console.log(`Looking for: ${currentBook} chapter ${currentChapter}`);
-  
-  // Split by semicolons first, then by commas
-  const mainReferences = secondaryScripture.split(';').map(ref => ref.trim());
-  
-  for (let mainRef of mainReferences) {
-    console.log(`  Checking main reference: "${mainRef}"`);
-    
-    // Split by commas for sub-references
-    const subReferences = mainRef.split(',').map(ref => ref.trim());
-    
-    for (let ref of subReferences) {
-      console.log(`    Checking sub-reference: "${ref}"`);
-      
-      // Special case for "Job (varied chapters)"
-      if (ref.includes('(varied chapters)')) {
-        const bookMatch = ref.match(/^([A-Za-z0-9\s]+)\s*\(/);
-        if (bookMatch) {
-          const bookName = bookMatch[1].trim();
-          console.log(`      Special case - Book: "${bookName}"`);
-          if (normalizeBookName(bookName) === normalizeBookName(currentBook)) {
-            console.log(`      ✓ Match found (varied chapters)!`);
-            return true;
-          }
-        }
-        continue;
-      }
-      
-      // Regular parsing for specific references
-      const match = ref.match(/^(\d*\s*[A-Za-z]+(?:\s+[A-Za-z]+)*)\s+(\d+)(?::(\d+)(?:[–-](\d+))?)?(?:[–-](\d+)(?::(\d+))?)?/);
-      
-      if (match) {
-        const [, bookName, startChapter, startVerse, endVerse, endChapter, endChapterVerse] = match;
-        const cleanBook = bookName.trim();
-        
-        console.log(`      Parsed: Book="${cleanBook}", Chapter=${startChapter}`);
-        
-        // Check if book matches
-        if (normalizeBookName(cleanBook) === normalizeBookName(currentBook)) {
-          console.log(`      Book matches!`);
-          
-          const chapterStart = parseInt(startChapter);
-          let chapterEnd = chapterStart;
-          
-          // Check if there's a chapter range
-          if (endChapter) {
-            chapterEnd = parseInt(endChapter);
-          }
-          
-          console.log(`      Chapter range: ${chapterStart} to ${chapterEnd}`);
-          console.log(`      Current chapter ${currentChapter} in range? ${currentChapter >= chapterStart && currentChapter <= chapterEnd}`);
-          
-          if (currentChapter >= chapterStart && currentChapter <= chapterEnd) {
-            console.log(`      ✓ Match found!`);
-            return true;
-          }
-        }
-      } else {
-        console.log(`      No regex match for: "${ref}"`);
-      }
-    }
-  }
-  
-  console.log(`    No matches found for any references`);
-  return false;
-};
+import Header from '../Header/Header';
+import LoadingScreen from '../LoadingScreen';
+import { typeLabels, bibleBooks, exampleAuthors, resourceTypes } from '../Constants';
+import SortFilter from '../SortFilter';
+import Intro from "../Intro";
+import { supabase } from '../SupaBaseInfo'; // adjust the path to where your file actually is
+import { parseSecondaryScripture, sortByVerse, normalizeBookName } from '../Logic';
 
 function App() {
   const [selectedBook, setSelectedBook] = useState("");
@@ -577,7 +479,7 @@ function App() {
     >
       {/* Book select */}
       <div>
-        <label htmlFor="book-select" style={{ fontWeight: "bold" }}>
+        <label htmlFor="book-select" style={{ fontWeight: "bold", color:"black" }}>
           Choose a book:
         </label>
         <br />

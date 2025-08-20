@@ -1,7 +1,7 @@
 // Routes.js
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Home from "./Home";
+import Home from "./Home/Home";
 import About from "./About";
 import Donate from "./Donate";
 import SubmitResource from "./SubmitResource";

@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "./Header";
-import Footer from "./Footer";
+import Header from './Header/Header';
+import Footer from "./Footer/Footer";
 import mustardSeedLogo from "./MustardSeed.png"; // Update this path if needed
 
 export default function AboutUs() {

@@ -1,9 +1,9 @@
 // App.js
 import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
-import Header from "./Header";
+import Header from './Header/Header';
 import AppRoutes from "./Routes";
-import Footer from "./Footer";
+import Footer from "./Footer/Footer";
 import LoadingScreen from './LoadingScreen';
 import { typeLabels, bibleBooks, exampleAuthors, resourceTypes } from './Constants';
 import Intro from "./Intro";
