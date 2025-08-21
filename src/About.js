@@ -1,28 +1,65 @@
 import React from "react";
-import Header from './Header/Header';
+import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
-import mustardSeedLogo from "./MustardSeed.png"; // Update this path if needed
+import mustardSeedLogo from "./MustardSeed.png";
+
+// Mobile detection hook
+function useIsMobile(breakpoint = 768) {
+  const getIsMobile = () =>
+    typeof window !== "undefined" ? window.innerWidth <= breakpoint : false;
+  const [isMobile, setIsMobile] = React.useState(getIsMobile);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(getIsMobile());
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, [breakpoint]);
+
+  return isMobile;
+}
 
 export default function AboutUs() {
+  const isMobile = useIsMobile(768);
+
   const Section = ({ title, children }) => (
     <section
       style={{
         width: "100%",
-        border: "1px solid #ccc",
+        boxSizing: "border-box",
+        border: "1px solid #ddd",
         borderRadius: "10px",
-        padding: "1.5rem",
-        marginBottom: "1.5rem",
+        padding: isMobile ? "0.9rem" : "1.5rem",
+        marginBottom: "1.25rem",
         backgroundColor: "#fff",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
       }}
     >
-      <h2 style={{ marginTop: 0, color: "#000" }}>{title}</h2>
-      <div style={{ color: "#111", lineHeight: "1.6" }}>{children}</div>
+      <h2
+        style={{
+          marginTop: 0,
+          marginBottom: "0.5rem",
+          color: "#000",
+          fontSize: isMobile ? "1rem" : "1.5rem",
+          lineHeight: 1.3,
+        }}
+      >
+        {title}
+      </h2>
+      <div
+        style={{
+          color: "#111",
+          lineHeight: 1.6,
+          fontSize: isMobile ? "0.9rem" : "1rem",
+        }}
+      >
+        {children}
+      </div>
     </section>
   );
 
   const buttonStyle = {
-    padding: "0.6rem 1.2rem",
+    padding: isMobile ? "0.5rem 0.8rem" : "0.7rem 1.2rem",
     borderRadius: "6px",
     border: "1.5px solid #000",
     backgroundColor: "#000",
@@ -30,32 +67,56 @@ export default function AboutUs() {
     fontWeight: "bold",
     cursor: "pointer",
     transition: "all 0.2s",
+    width: isMobile ? "100%" : "auto",
+    fontSize: isMobile ? "0.9rem" : "1rem",
   };
 
-  const buttonHover = (e) => {
-    e.currentTarget.style.backgroundColor = "#333";
-  };
-
-  const buttonOut = (e) => {
-    e.currentTarget.style.backgroundColor = "#000";
-  };
+  const buttonHover = (e) => (e.currentTarget.style.backgroundColor = "#333");
+  const buttonOut = (e) => (e.currentTarget.style.backgroundColor = "#000");
 
   return (
-    <div style={{ padding: "4rem 2rem 2rem", textAlign: "center", backgroundColor: "#f9f9f9", minHeight: "100vh"}}>
+    <div
+      style={{
+        padding: isMobile ? "1.5rem 1rem" : "4rem 2rem 2rem",
+        textAlign: "center",
+        backgroundColor: "#f9f9f9",
+        minHeight: "100vh",
+        boxSizing: "border-box",
+
+      }}
+    >
       <Header />
-      <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", marginBottom: "1rem", color: "#000" }}>
+
+      {/* Hero Section */}
+      <h1
+        style={{
+          fontSize: isMobile ? "1.5rem" : "2.5rem",
+          fontWeight: "bold",
+          marginBottom: ".75rem",
+          color: "#000",
+          marginTop: "1.5rem",
+        }}
+      >
         About Reformed Chapter
       </h1>
-      <p style={{ fontSize: "1.2rem", marginBottom: "2rem", color: "#555" }}>
+      <p
+        style={{
+          fontSize: isMobile ? "0.95rem" : "1.2rem",
+          marginBottom: isMobile ? "1.25rem" : "2rem",
+          color: "#555",
+        }}
+      >
         Biblical Depth. Reformed Clarity. Chapter by Chapter.
       </p>
 
+      {/* Content Container */}
       <div
         style={{
           maxWidth: "900px",
-          marginLeft: "auto",
-          marginRight: "auto",
+          margin: "0 auto",
           textAlign: "left",
+          padding: isMobile ? "0 0.25rem" : "0",
+          boxSizing: "border-box",
         }}
       >
         <Section title="Our Mission">
@@ -64,7 +125,7 @@ export default function AboutUs() {
         </Section>
 
         <Section title="What We Offer">
-          <ul style={{ paddingLeft: "1.2rem", margin: 0 }}>
+          <ul style={{ paddingLeft: isMobile ? "1rem" : "1.25rem", margin: 0 }}>
             <li>Hand-picked sermons, books, devotionals, and commentaries</li>
             <li>Reformed theology–aligned content</li>
             <li>Organized by book and chapter of the Bible</li>
@@ -86,14 +147,16 @@ export default function AboutUs() {
         </Section>
 
         <Section title="Our Logo">
-          <p>
-            The mustard seed is a powerful symbol for Reformed Chapter. It represents faith and growth from small beginnings, reflecting how studying even a single chapter of Scripture can lead to deep, transformative spiritual growth. Just as the mustard seed grows into a large tree in Jesus’ teaching, our hope is that each small study here will help faith flourish.
+          <p style={{ marginBottom: "0.75rem" }}>
+            The mustard seed is a powerful symbol for Reformed Chapter. It represents faith and
+            growth from small beginnings, reflecting how studying even a single chapter of Scripture
+            can lead to deep, transformative spiritual growth.
           </p>
-          <div style={{ textAlign: "center", marginTop: "1rem" }}>
+          <div style={{ textAlign: "center", marginTop: "0.5rem" }}>
             <img
               src={mustardSeedLogo}
               alt="Mustard Seed Logo"
-              style={{ maxWidth: "100px", height: "auto" }}
+              style={{ maxWidth: isMobile ? "70px" : "100px", height: "auto" }}
             />
           </div>
         </Section>
@@ -103,7 +166,13 @@ export default function AboutUs() {
             We’re always looking to improve. Have a resource to recommend? Reach out and help us grow this collection.
           </p>
 
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              gap: "0.75rem",
+            }}
+          >
             <button
               onClick={() => (window.location.href = "/submit")}
               style={buttonStyle}
@@ -124,6 +193,8 @@ export default function AboutUs() {
           </div>
         </Section>
       </div>
+
+      {!isMobile && <Footer />}
     </div>
   );
 }
