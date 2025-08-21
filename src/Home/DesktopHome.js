@@ -235,12 +235,16 @@ function App() {
   };
 
   const bubbleStyle = {
-    backgroundColor: "#e0e0e0",
-    padding: "0.35rem 0.75rem",
-    borderRadius: "999px",
-    fontSize: "0.7rem",
+    backgroundColor: "#f5f5f5",
+    padding: "0.3rem 0.6rem",
+    borderRadius: "16px",
+    fontSize: "0.65rem",
     fontWeight: "500",
-    color: "#333",
+    color: "#555",
+    border: "1px solid #e0e0e0",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.25rem"
   };
 
   const ResourceCard = ({ resource, isSecondary = false }) => {
@@ -278,14 +282,24 @@ function App() {
         style={{
           display: "flex",
           backgroundColor: "white",
-          padding: "1rem",
-          border: "2px solid black",
-          borderRadius: "12px",
+          padding: "1.25rem",
+          border: "1px solid #e5e7eb",
+          borderRadius: "16px",
           fontSize: "0.95rem",
           transition: "all 0.2s ease",
           cursor: "pointer",
           maxWidth: "700px",
           marginBottom: "1.5rem",
+          minHeight: description ? "auto" : "90px",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
+          e.currentTarget.style.transform = "translateY(-2px)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.1)";
+          e.currentTarget.style.transform = "translateY(0)";
         }}
       >
         {image && (
@@ -304,77 +318,121 @@ function App() {
           />
         )}
 
-        <div style={{ flex: 1, display: "flex" }}>
-          <div style={{ flex: 1 }}>
-            <h4
-              style={{
-                margin: "0 0 0.25rem 0",
-                color: "#000",
-                fontSize: "1.2rem",
-                textDecoration: "underline",
-                marginBottom: "1rem"
-              }}
-            >
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "#000", textDecoration: "underline" }}
+        <div style={{ flex: 1, display: "flex", gap: "1rem" }}>
+          <div style={{ 
+            flex: 1, 
+            display: "flex", 
+            flexDirection: "column",
+            minWidth: 0 // Allows flex item to shrink below its content size
+          }}>
+            <div style={{ flex: "1" }}>
+              <h4
+                style={{
+                  margin: "0",
+                  color: "#000",
+                  fontSize: "1.3rem",
+                  fontWeight: "600",
+                  lineHeight: "1.3",
+                  marginBottom: description ? "0.8rem" : "0.6rem"
+                }}
               >
-                {title}
-              </a>
-            </h4>
-            
-            {description && (
-              <p style={{ margin: 0, color: "#444", fontSize: "1rem", fontStyle: "italic" }}>
-                {description}
-              </p>
-            )}
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ 
+                    color: "#2563eb", 
+                    textDecoration: "none",
+                    borderBottom: "2px solid transparent",
+                    transition: "border-color 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => e.target.style.borderBottomColor = "#2563eb"}
+                  onMouseLeave={(e) => e.target.style.borderBottomColor = "transparent"}
+                >
+                  {title}
+                </a>
+              </h4>
+              
+              {description && (
+                <p style={{ 
+                  margin: "0", 
+                  color: "#666", 
+                  fontSize: "0.95rem", 
+                  fontStyle: "italic",
+                  lineHeight: "1.4"
+                }}>
+                  {description}
+                </p>
+              )}
+            </div>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem" }}>
+            <div style={{ 
+              display: "flex", 
+              flexWrap: "nowrap", 
+              gap: "0.6rem", 
+              marginTop: description ? "1.2rem" : "auto",
+              alignItems: "center",
+              overflow: "hidden" // Prevents bubbles from overflowing
+            }}>
               {author && (
                 <span style={bubbleStyle}>
-                  👤 {author}
+                  <span style={{ fontSize: "0.8rem" }}>👤</span>
+                  {author}
                 </span>
               )}
 
               {formattedReference && (
-                <span style={bubbleStyle}>📖 {formattedReference}</span>
+                <span style={bubbleStyle}>
+                  <span style={{ fontSize: "0.8rem" }}>📖</span>
+                  {formattedReference}
+                </span>
               )}
 
               {price && (
                 <span style={bubbleStyle}>
-                  <span style={{ color: "green", marginRight: "0.25rem" }}>💲</span>
+                  <span style={{ fontSize: "0.8rem" }}>💲</span>
                   {price.toLowerCase() === "free" ? "Free" : price}
                 </span>
               )}
 
               {published_year && (
-                <span style={bubbleStyle}>📅 {published_year}</span>
+                <span style={bubbleStyle}>
+                  <span style={{ fontSize: "0.8rem" }}>📅</span>
+                  {published_year}
+                </span>
               )}
             </div>
           </div>
 
           {secondary_scripture && (
             <div style={{
-              flexBasis: "30%",
-              paddingLeft: "1.5rem",
+              flexShrink: 0,
+              width: "180px", // Fixed width instead of percentage
+              paddingLeft: "1rem",
               paddingTop: "0.5rem",
-              minWidth: "200px",
-              wordWrap: "break-word",
-              whiteSpace: "normal",
+              borderLeft: "2px solid #e5e7eb", // Visual separator
               display: "flex",
               flexDirection: "column",
               justifyContent: "flex-start",
               fontSize: "0.8rem",
               fontStyle: "italic",
-              color: "#555",
+              color: "#666",
               textAlign: "left"
             }}>
-              <strong style={{ fontStyle: "normal", color: "#333", fontWeight: "600" }}>
-                Secondary Scripture:
+              <strong style={{ 
+                fontStyle: "normal", 
+                color: "#374151", 
+                fontWeight: "600",
+                marginBottom: "0.3rem",
+                fontSize: "0.75rem",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em"
+              }}>
+                Secondary Scripture
               </strong>
-              <span>{secondary_scripture}</span>
+              <span style={{ fontSize: "0.85rem", fontWeight: "500" }}>
+                {secondary_scripture}
+              </span>
             </div>
           )}
         </div>

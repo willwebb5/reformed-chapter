@@ -257,6 +257,7 @@ const ReformedChapterDonate = () => {
 
         .support-message h2 {
           color: #2d3748;
+          margin-top: 0;
           margin-bottom: 20px;
           font-size: 1.5em;
           font-weight: 600;
@@ -495,7 +496,7 @@ const ReformedChapterDonate = () => {
         @media (max-width: 640px) {
           .page-container {
             padding: 15px;
-            padding-top: 50px;
+            padding-top: 80px;
           }
 
           .support-message {

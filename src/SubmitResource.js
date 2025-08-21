@@ -307,7 +307,7 @@ export default function SubmitResource() {
           type="submit"
           style={{
             padding: "0.75rem",
-            backgroundColor: "#000",
+            backgroundColor: "#004080",
             color: "#fff",
             border: "none",
             borderRadius: "6px",
@@ -315,8 +315,8 @@ export default function SubmitResource() {
             fontWeight: "bold",
             transition: "all 0.2s",
           }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#333")}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#000")}
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#0059b3")}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#004080")}
         >
           Submit Resource
         </button>

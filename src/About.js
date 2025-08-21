@@ -59,20 +59,20 @@ export default function AboutUs() {
   );
 
   const buttonStyle = {
-    padding: isMobile ? "0.5rem 0.8rem" : "0.7rem 1.2rem",
-    borderRadius: "6px",
-    border: "1.5px solid #000",
-    backgroundColor: "#000",
-    color: "#fff",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "all 0.2s",
-    width: isMobile ? "100%" : "auto",
-    fontSize: isMobile ? "0.9rem" : "1rem",
-  };
+  padding: isMobile ? "0.5rem 0.8rem" : "0.7rem 1.2rem",
+  borderRadius: "6px",
+  border: "1.5px solid #004080",   // blue border
+  backgroundColor: "#004080",      // blue background
+  color: "#fff",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  width: isMobile ? "100%" : "auto",
+  fontSize: isMobile ? "0.9rem" : "1rem",
+};
 
-  const buttonHover = (e) => (e.currentTarget.style.backgroundColor = "#333");
-  const buttonOut = (e) => (e.currentTarget.style.backgroundColor = "#000");
+  const buttonHover = (e) => (e.currentTarget.style.backgroundColor = "#0059b3");
+  const buttonOut = (e) => (e.currentTarget.style.backgroundColor = "#004080");
 
   return (
     <div
@@ -193,8 +193,6 @@ export default function AboutUs() {
           </div>
         </Section>
       </div>
-
-      {!isMobile && <Footer />}
     </div>
   );
 }
