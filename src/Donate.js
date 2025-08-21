@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -64,7 +64,7 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
         setMessage(error.message);
         onError?.(error);
       } else if (paymentIntent.status === 'succeeded') {
-        setMessage('Donation successful! Thank you for your support.');
+        setMessage('Thank you for your generous donation!');
         onSuccess?.(paymentIntent);
       }
     } catch (err) {
@@ -76,63 +76,53 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
   };
 
   const cardElementOptions = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770',
-      '::placeholder': { color: '#aab7c4' },
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        '::placeholder': { color: '#aab7c4' },
+      },
+      invalid: { color: '#dc2626' },
     },
-    invalid: { color: '#9e2146' },
-  },
-};
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="donation-form">
+    <div className="donation-form">
       <div className="card-element-container">
         <CardElement options={cardElementOptions} />
       </div>
       
       <button
-        type="submit"
+        onClick={handleSubmit}
         disabled={!stripe || processing}
         className="donate-button"
       >
-        {processing ? 'Processing...' : `Donate $${amount}`}
+        {processing ? 'Processing...' : `Donate ${amount}`}
       </button>
       
       {message && (
-        <div className={`message ${message.includes('successful') ? 'success' : 'error'}`}>
+        <div className={`message ${message.includes('Thank you') ? 'success' : 'error'}`}>
           {message}
         </div>
       )}
-    </form>
+    </div>
   );
 };
 
-const DonateComponent = () => {
+const ReformedChapterDonate = () => {
   const [amount, setAmount] = useState(25);
   const [customAmount, setCustomAmount] = useState('');
   const [showForm, setShowForm] = useState(false);
 
-  const presetAmounts = [10, 25, 50, 100];
+  const presetAmounts = [15, 25, 50, 100];
 
   // Show error if Stripe key is missing
   if (!publishableKey) {
     return (
-      <div style={{ 
-        maxWidth: '500px', 
-        margin: '50px auto', 
-        padding: '20px', 
-        textAlign: 'center',
-        background: '#fee',
-        border: '1px solid #fcc',
-        borderRadius: '8px'
-      }}>
+      <div className="error-container">
         <h2>⚠️ Stripe Configuration Missing</h2>
         <p>Please check your <code>.env.local</code> file and make sure you have:</p>
-        <pre style={{background: '#f0f0f0', padding: '10px', textAlign: 'left'}}>
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
-        </pre>
+        <pre>REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here</pre>
         <p>Then restart your server with <code>npm run dev</code></p>
       </div>
     );
@@ -153,400 +143,422 @@ const DonateComponent = () => {
 
   const handleSuccess = (paymentIntent) => {
     console.log('Payment successful:', paymentIntent);
-    // You can add success handling here (e.g., show thank you message, redirect, etc.)
     setShowForm(false);
   };
 
   const handleError = (error) => {
     console.error('Payment error:', error);
-    // Handle error (already shown in form, but you can add additional handling)
   };
 
   return (
-    <div className="donate-container">
-      <h2>Make a Donation</h2>
-      
-      {!showForm ? (
-        <div className="amount-selection">
-          <h3>Select Amount</h3>
-          
-          <div className="preset-amounts">
-            {presetAmounts.map((presetAmount) => (
-              <button
-                key={presetAmount}
-                onClick={() => handleAmountSelect(presetAmount)}
-                className={`amount-button ${amount === presetAmount ? 'selected' : ''}`}
-              >
-                ${presetAmount}
-              </button>
-            ))}
-          </div>
-          
-          <div className="custom-amount">
-            <label htmlFor="custom-amount">Custom Amount:</label>
-            <input
-              id="custom-amount"
-              type="number"
-              min="1"
-              step="0.01"
-              placeholder="Enter amount"
-              value={customAmount}
-              onChange={handleCustomAmountChange}
-            />
-          </div>
-          
-          <button
-            onClick={() => setShowForm(true)}
-            disabled={!amount || amount <= 0}
-            className="proceed-button"
-          >
-            Donate ${amount}
-          </button>
+    <div className="page-container">
+      {/* Support Message Bubble */}
+      <div className="support-message">
+        <h2>Supporting Reformed Chapter</h2>
+        <p>
+          Reformed Chapter is committed to providing free, high-quality biblical resources 
+          to believers around the world. Your generous donation helps us maintain and expand 
+          our collection of Reformed theological works, commentaries, and study materials.
+        </p>
+        <p>
+          Every contribution, no matter the size, enables us to continue serving the church 
+          with faithful biblical scholarship and sound doctrine. Thank you for partnering 
+          with us in this ministry.
+        </p>
+        <div className="verse">
+          <em>"Each of you should give what you have decided in your heart to give, not reluctantly 
+          or under compulsion, for God loves a cheerful giver." - 2 Corinthians 9:7</em>
         </div>
-      ) : (
-        <div className="payment-form">
-          <h3>Donate ${amount}</h3>
-          <Elements stripe={stripePromise}>
-            <CheckoutForm
-              amount={amount}
-              onSuccess={handleSuccess}
-              onError={handleError}
-            />
-          </Elements>
-          <button
-            onClick={() => setShowForm(false)}
-            className="back-button"
-          >
-            ← Back to Amount Selection
-          </button>
-        </div>
-      )}
-      
+      </div>
+
+      {/* Donation Form */}
+      <div className="donate-container">
+        <h3>Make a Donation</h3>
+        
+        {!showForm ? (
+          <div className="amount-selection">
+            <div className="preset-amounts">
+              {presetAmounts.map((presetAmount) => (
+                <button
+                  key={presetAmount}
+                  onClick={() => handleAmountSelect(presetAmount)}
+                  className={`amount-button ${amount === presetAmount ? 'selected' : ''}`}
+                >
+                  ${presetAmount}
+                </button>
+              ))}
+            </div>
+            
+            <div className="custom-amount">
+              <label htmlFor="custom-amount">Other Amount:</label>
+              <input
+                id="custom-amount"
+                type="number"
+                min="1"
+                step="0.01"
+                placeholder="Enter amount"
+                value={customAmount}
+                onChange={handleCustomAmountChange}
+              />
+            </div>
+            
+            <button
+              onClick={() => setShowForm(true)}
+              disabled={!amount || amount <= 0}
+              className="proceed-button"
+            >
+              Continue with ${amount}
+            </button>
+          </div>
+        ) : (
+          <div className="payment-form">
+            <div className="donation-summary">
+              <h4>Donation Amount: ${amount}</h4>
+              <p>Thank you for supporting Reformed Chapter</p>
+            </div>
+            
+            <Elements stripe={stripePromise}>
+              <CheckoutForm
+                amount={amount}
+                onSuccess={handleSuccess}
+                onError={handleError}
+              />
+            </Elements>
+            
+            <button
+              onClick={() => setShowForm(false)}
+              className="back-button"
+            >
+              ← Change Amount
+            </button>
+          </div>
+        )}
+      </div>
+
       <style jsx>{`
-        .donate-container {
-          max-width: 600px;
+        .page-container {
+          max-width: 700px;
           margin: 0 auto;
-          padding: 40px 20px;
+          padding: 20px;
+          padding-top: 100px;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 20px;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-          color: white;
-          position: relative;
-          overflow: hidden;
+          line-height: 1.6;
+          color: #333;
         }
-        
-        .donate-container::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.05"><circle cx="30" cy="30" r="4"/></g></svg>') repeat;
-          pointer-events: none;
-        }
-        
-        .donate-container > * {
-          position: relative;
-          z-index: 1;
-        }
-        
-        .donate-container h2 {
-          text-align: center;
-          font-size: 2.5em;
-          margin-bottom: 10px;
-          background: linear-gradient(45deg, #fff, #f0f8ff);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          font-weight: 700;
-        }
-        
-        .amount-selection {
-          text-align: center;
-          background: rgba(255,255,255,0.1);
-          backdrop-filter: blur(10px);
+
+        .support-message {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
           padding: 30px;
-          border-radius: 16px;
-          border: 1px solid rgba(255,255,255,0.2);
+          margin-bottom: 30px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
-        .amount-selection h3 {
-          font-size: 1.4em;
-          margin-bottom: 25px;
-          color: #fff;
+
+        .support-message h2 {
+          color: #2d3748;
+          margin-bottom: 20px;
+          font-size: 1.5em;
           font-weight: 600;
         }
-        
+
+        .support-message p {
+          margin-bottom: 15px;
+          color: #4a5568;
+        }
+
+        .verse {
+          background: #edf2f7;
+          border-left: 4px solid #4a5568;
+          padding: 15px 20px;
+          margin-top: 20px;
+          border-radius: 0 8px 8px 0;
+          color: #2d3748;
+          font-size: 0.95em;
+        }
+
+        .donate-container {
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 30px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .donate-container h3 {
+          text-align: center;
+          margin-bottom: 25px;
+          color: #2d3748;
+          font-size: 1.3em;
+          font-weight: 600;
+        }
+
+        .amount-selection {
+          text-align: center;
+        }
+
         .preset-amounts {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-          gap: 15px;
-          margin: 30px 0;
+          gap: 12px;
+          margin-bottom: 25px;
         }
-        
+
         .amount-button {
-          padding: 16px 20px;
-          border: 2px solid rgba(255,255,255,0.3);
-          background: rgba(255,255,255,0.1);
-          color: white;
-          border-radius: 12px;
+          padding: 12px 16px;
+          border: 2px solid #e2e8f0;
+          background: white;
+          color: #4a5568;
+          border-radius: 8px;
           cursor: pointer;
-          font-size: 18px;
-          font-weight: 600;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          backdrop-filter: blur(5px);
-          position: relative;
-          overflow: hidden;
+          font-size: 16px;
+          font-weight: 500;
+          transition: all 0.2s;
         }
-        
-        .amount-button::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-          transition: left 0.5s;
-        }
-        
-        .amount-button:hover::before {
-          left: 100%;
-        }
-        
+
         .amount-button:hover {
-          background: rgba(255,255,255,0.2);
-          border-color: rgba(255,255,255,0.5);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+          border-color: #cbd5e0;
+          background: #f7fafc;
         }
-        
+
         .amount-button.selected {
-          background: rgba(255,255,255,0.9);
-          color: #667eea;
-          border-color: white;
-          transform: scale(1.05);
-          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          background: #4a5568;
+          color: white;
+          border-color: #4a5568;
         }
-        
+
         .custom-amount {
-          margin: 30px 0;
+          margin-bottom: 25px;
         }
-        
+
         .custom-amount label {
           display: block;
-          margin-bottom: 12px;
-          font-weight: 600;
-          font-size: 1.1em;
-          color: #fff;
+          margin-bottom: 8px;
+          font-weight: 500;
+          color: #4a5568;
         }
-        
+
         .custom-amount input {
-          padding: 16px 20px;
-          border: 2px solid rgba(255,255,255,0.3);
-          border-radius: 12px;
-          font-size: 18px;
-          width: 250px;
+          padding: 12px 16px;
+          border: 2px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 16px;
+          width: 200px;
           max-width: 100%;
-          background: rgba(255,255,255,0.1);
-          color: white;
+          box-sizing: border-box;
           text-align: center;
-          font-weight: 600;
-          backdrop-filter: blur(5px);
-          transition: all 0.3s;
+          transition: border-color 0.2s;
         }
-        
-        .custom-amount input::placeholder {
-          color: rgba(255,255,255,0.7);
-        }
-        
+
         .custom-amount input:focus {
           outline: none;
-          border-color: white;
-          background: rgba(255,255,255,0.2);
-          box-shadow: 0 0 20px rgba(255,255,255,0.3);
+          border-color: #4a5568;
         }
-        
-        .proceed-button, .back-button {
-          padding: 18px 40px;
-          background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+
+        .proceed-button {
+          background: #4a5568;
           color: white;
           border: none;
-          border-radius: 50px;
-          font-size: 18px;
-          font-weight: 600;
+          padding: 14px 28px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 500;
           cursor: pointer;
-          margin: 15px;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-          position: relative;
-          overflow: hidden;
+          transition: background-color 0.2s;
         }
-        
-        .proceed-button::before, .back-button::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-          transition: left 0.5s;
+
+        .proceed-button:hover:not(:disabled) {
+          background: #2d3748;
         }
-        
-        .proceed-button:hover::before, .back-button:hover::before {
-          left: 100%;
-        }
-        
-        .proceed-button:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 35px rgba(255, 107, 107, 0.6);
-        }
-        
+
         .proceed-button:disabled {
-          background: rgba(255,255,255,0.3);
+          background: #cbd5e0;
           cursor: not-allowed;
-          transform: none;
-          box-shadow: none;
         }
-        
-        .back-button {
-          background: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
-          border: 2px solid rgba(255,255,255,0.3);
-          box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-        }
-        
-        .back-button:hover {
-          background: rgba(255,255,255,0.3);
-          transform: translateY(-3px);
-          box-shadow: 0 12px 35px rgba(0,0,0,0.2);
-        }
-        
+
         .payment-form {
           text-align: center;
-          background: rgba(255,255,255,0.1);
-          backdrop-filter: blur(10px);
-          padding: 30px;
-          border-radius: 16px;
-          border: 1px solid rgba(255,255,255,0.2);
         }
-        
-        .payment-form h3 {
-          font-size: 1.8em;
+
+        .donation-summary {
+          background: #f7fafc;
+          padding: 20px;
+          border-radius: 8px;
           margin-bottom: 25px;
-          color: #fff;
-          font-weight: 600;
         }
-        
+
+        .donation-summary h4 {
+          margin-bottom: 8px;
+          color: #2d3748;
+          font-size: 1.2em;
+        }
+
+        .donation-summary p {
+          color: #4a5568;
+          margin: 0;
+        }
+
         .donation-form {
-          max-width: 450px;
+          max-width: 400px;
           margin: 0 auto;
         }
-        
+
         .card-element-container {
-          padding: 20px;
-          border: 2px solid rgba(255,255,255,0.3);
-          border-radius: 12px;
-          margin: 25px 0;
-          background: rgba(255,255,255,0.9);
-          backdrop-filter: blur(10px);
-          transition: all 0.3s;
+          padding: 16px;
+          border: 2px solid #e2e8f0;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          background: white;
+          transition: border-color 0.2s;
         }
-        
+
         .card-element-container:focus-within {
-          border-color: #667eea;
-          box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+          border-color: #4a5568;
         }
-        
+
         .donate-button {
           width: 100%;
-          padding: 20px;
-          background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+          padding: 16px;
+          background: #4a5568;
           color: white;
           border: none;
-          border-radius: 50px;
-          font-size: 20px;
-          font-weight: 600;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 500;
           cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-          position: relative;
-          overflow: hidden;
+          transition: background-color 0.2s;
         }
-        
-        .donate-button::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-          transition: left 0.5s;
-        }
-        
-        .donate-button:hover:not(:disabled)::before {
-          left: 100%;
-        }
-        
+
         .donate-button:hover:not(:disabled) {
-          transform: translateY(-3px);
-          box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+          background: #2d3748;
         }
-        
+
         .donate-button:disabled {
-          background: rgba(255,255,255,0.3);
+          background: #cbd5e0;
           cursor: not-allowed;
-          transform: none;
-          box-shadow: none;
         }
-        
+
+        .back-button {
+          background: transparent;
+          color: #4a5568;
+          border: 2px solid #e2e8f0;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-size: 14px;
+          cursor: pointer;
+          margin-top: 15px;
+          transition: all 0.2s;
+        }
+
+        .back-button:hover {
+          border-color: #cbd5e0;
+          background: #f7fafc;
+        }
+
         .message {
-          margin-top: 20px;
-          padding: 16px 20px;
-          border-radius: 12px;
-          text-align: center;
-          font-weight: 600;
-          backdrop-filter: blur(10px);
+          margin-top: 15px;
+          padding: 12px 16px;
+          border-radius: 8px;
+          font-weight: 500;
         }
-        
+
         .message.success {
-          background: rgba(72, 187, 120, 0.2);
-          color: #68d391;
-          border: 2px solid rgba(72, 187, 120, 0.3);
-          box-shadow: 0 4px 15px rgba(72, 187, 120, 0.2);
+          background: #f0fff4;
+          color: #38a169;
+          border: 1px solid #c6f6d5;
         }
-        
+
         .message.error {
-          background: rgba(245, 101, 101, 0.2);
-          color: #fc8181;
-          border: 2px solid rgba(245, 101, 101, 0.3);
-          box-shadow: 0 4px 15px rgba(245, 101, 101, 0.2);
+          background: #fed7d7;
+          color: #e53e3e;
+          border: 1px solid #feb2b2;
         }
-        
+
+        .error-container {
+          max-width: 500px;
+          margin: 50px auto;
+          padding: 20px;
+          background: #fed7d7;
+          border: 1px solid #feb2b2;
+          border-radius: 8px;
+          text-align: center;
+        }
+
+        .error-container pre {
+          background: #f7fafc;
+          padding: 10px;
+          text-align: left;
+          border-radius: 4px;
+          font-size: 14px;
+        }
+
         @media (max-width: 640px) {
+          .page-container {
+            padding: 15px;
+            padding-top: 50px;
+          }
+
+          .support-message {
+            padding: 20px;
+            margin-bottom: 20px;
+          }
+
+          .support-message h2 {
+            font-size: 1.3em;
+          }
+
+          .support-message p {
+            font-size: 0.95em;
+          }
+
+          .verse {
+            padding: 12px 15px;
+            font-size: 0.9em;
+          }
+
           .donate-container {
-            margin: 20px;
-            padding: 30px 20px;
+            padding: 20px;
           }
-          
-          .donate-container h2 {
-            font-size: 2em;
+
+          .donate-container h3 {
+            font-size: 1.2em;
           }
-          
+
           .preset-amounts {
             grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
           }
-          
+
+          .amount-button {
+            padding: 14px 12px;
+            font-size: 15px;
+          }
+
           .custom-amount input {
-            width: 100%;
+            width: calc(100% - 4px);
+            max-width: none;
           }
-          
-          .proceed-button, .back-button {
-            width: calc(100% - 30px);
-            margin: 10px 15px;
+
+          .proceed-button {
+            width: 100%;
+            padding: 16px;
+          }
+
+          .donation-form {
+            max-width: none;
+          }
+
+          .back-button {
+            width: 100%;
+            margin-top: 20px;
+          }
+
+          .donation-summary {
+            padding: 15px;
+          }
+
+          .donation-summary h4 {
+            font-size: 1.1em;
           }
         }
       `}</style>
@@ -554,4 +566,4 @@ const DonateComponent = () => {
   );
 };
 
-export default DonateComponent;
+export default ReformedChapterDonate;
