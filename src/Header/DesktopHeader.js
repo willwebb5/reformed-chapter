@@ -17,8 +17,8 @@ export default function Header() {
         onMouseLeave={() => setHovered(null)}
         style={{
           padding: "0.5rem 1rem",
-          backgroundColor: isHovered ? "white" : "black",
-          color: isHovered ? "black" : "white",
+          backgroundColor: isHovered ? "#8e7727" : "#d9c48c",
+          color: isHovered ? "black" : "black",
           border: "2px solid white",
           borderRadius: "10px",
           fontSize: "0.9rem",
