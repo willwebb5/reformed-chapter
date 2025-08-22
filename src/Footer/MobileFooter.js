@@ -48,8 +48,17 @@ export default function MobileFooter() {
             <a href="/" style={linkStyle}>Home</a>
             <a href="/about" style={linkStyle}>About</a>
             <a href="/submitresource" style={linkStyle}>Submit</a>
-            <a href="mailto:.com" style={linkStyle}>Contact</a>
+            <a href="mailto:reformedchapter@gmail.com" style={linkStyle}>Contact</a>
             <a href="/donate" style={linkStyle}>Donate</a>
+            {/* Instagram link */}
+            <a
+              href="https://www.instagram.com/reformed.chapter/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={linkStyle}
+            >
+              Instagram
+            </a>
           </div>
         </div>
 
@@ -96,6 +105,8 @@ export default function MobileFooter() {
             <button
               onClick={() => window.location.href = "/donate"}
               style={buttonStyle}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#0059b3"}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#004080"}
             >
               Donate
             </button>

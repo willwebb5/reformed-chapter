@@ -163,7 +163,7 @@ export default function AboutUs() {
 
         <Section title="Join Us">
           <p style={{ marginBottom: "1rem" }}>
-            We’re always looking to improve. Have a resource to recommend? Reach out and help us grow this collection.
+            We’re always looking to improve. Have a resource to recommend? Reach out and help us grow this collection. Our email address is reformedchapter@gmail.com
           </p>
 
           <div

@@ -42,19 +42,48 @@ function App() {
     videos: [],
   });
 
+  // New state for author-only resources
+  const [authorOnlyResources, setAuthorOnlyResources] = useState({
+    sermons: [],
+    commentaries: [],
+    devotionals: [],
+    books: [],
+    videos: [],
+  });
+
   const chaptersCount =
     bibleBooks.find((book) => book.name === selectedBook)?.chapters || 0;
 
+  // Check if we're in author-only mode
+  const isAuthorOnlyMode = useMemo(() => {
+    return filters.authors.size > 0 && (!selectedBook || !selectedChapter);
+  }, [filters.authors, selectedBook, selectedChapter]);
+
   const fetchResources = async () => {
-    if (!selectedBook || !selectedChapter) return;
+    // If neither book/chapter nor author is selected, don't fetch
+    if (!selectedBook && filters.authors.size === 0) {
+      setPrimaryResources({
+        sermons: [], commentaries: [], devotionals: [], books: [], videos: []
+      });
+      setSecondaryResources({
+        sermons: [], commentaries: [], devotionals: [], books: [], videos: []
+      });
+      setAuthorOnlyResources({
+        sermons: [], commentaries: [], devotionals: [], books: [], videos: []
+      });
+      return;
+    }
+
+    // If we have a book but no chapter, don't fetch scripture-based resources
+    if (selectedBook && !selectedChapter && filters.authors.size === 0) {
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
-      const selectedChapterNum = parseInt(selectedChapter);
-      
-      // Fetch all resources for the book
+      // Fetch all resources
       const { data, error } = await supabase
         .from('resources')
         .select('*')
@@ -72,55 +101,101 @@ function App() {
         }
       });
       setAvailableAuthors(uniqueAuthors);
-      
-      const primaryData = data.filter(resource => {
-        if (resource.book !== selectedBook) return false;
 
-        // If no chapter specified, treat as whole book
-        if (!resource.chapter) return true;
-
-        const start = parseInt(resource.chapter);
-        const end = resource.chapter_end ? parseInt(resource.chapter_end) : start;
-        return selectedChapterNum >= start && selectedChapterNum <= end;
-      });
-
-      const secondaryData = data.filter(resource => {
-        if (!resource.secondary_scripture) return false;
+      // Handle author-only mode
+      if (isAuthorOnlyMode) {
+        console.log("Author-only mode activated");
+        const selectedAuthors = Array.from(filters.authors);
         
-        console.log(`\nChecking resource: "${resource.title}"`);
-        console.log(`  Secondary scripture: "${resource.secondary_scripture}"`);
+        const authorData = data.filter(resource => {
+          return resource.author && selectedAuthors.includes(resource.author.trim());
+        });
+
+        console.log("Author-only resources found:", authorData);
+
+        const normalize = (str) => str.toLowerCase().trim().replace(/s$/, '');
+
+        // Group author resources by type
+        const groupedAuthorResources = {
+          sermons: authorData.filter(r => normalize(r.type) === 'sermon'),
+          books: authorData.filter(r => normalize(r.type) === 'book'),
+          commentaries: authorData.filter(r => normalize(r.type) === 'commentary'),
+          devotionals: authorData.filter(r => normalize(r.type) === 'devotional'),
+          videos: authorData.filter(r => normalize(r.type) === 'video'),
+        };
+
+        setAuthorOnlyResources(groupedAuthorResources);
         
-        const secondaryMatch = parseSecondaryScripture(resource.secondary_scripture, selectedBook, selectedChapterNum);
-        console.log(`  Match result: ${secondaryMatch}`);
+        // Clear scripture-based resources in author-only mode
+        setPrimaryResources({
+          sermons: [], commentaries: [], devotionals: [], books: [], videos: []
+        });
+        setSecondaryResources({
+          sermons: [], commentaries: [], devotionals: [], books: [], videos: []
+        });
         
-        return secondaryMatch;
-      });
+        setLoading(false);
+        return;
+      }
 
-      console.log("Primary Resources:", primaryData);
-      console.log("Secondary Resources:", secondaryData);
+      // Original scripture-based logic
+      if (selectedBook && selectedChapter) {
+        const selectedChapterNum = parseInt(selectedChapter);
+        
+        const primaryData = data.filter(resource => {
+          if (resource.book !== selectedBook) return false;
 
-      const normalize = (str) => str.toLowerCase().trim().replace(/s$/, '');
+          // If no chapter specified, treat as whole book
+          if (!resource.chapter) return true;
 
-      // Group primary resources by type
-      const groupedPrimaryResources = {
-        sermons: primaryData.filter(r => normalize(r.type) === 'sermon'),
-        books: primaryData.filter(r => normalize(r.type) === 'book'),
-        commentaries: primaryData.filter(r => normalize(r.type) === 'commentary'),
-        devotionals: primaryData.filter(r => normalize(r.type) === 'devotional'),
-        videos: primaryData.filter(r => normalize(r.type) === 'video'),
-      };
+          const start = parseInt(resource.chapter);
+          const end = resource.chapter_end ? parseInt(resource.chapter_end) : start;
+          return selectedChapterNum >= start && selectedChapterNum <= end;
+        });
 
-      // Group secondary resources by type
-      const groupedSecondaryResources = {
-        sermons: secondaryData.filter(r => normalize(r.type) === 'sermon'),
-        books: secondaryData.filter(r => normalize(r.type) === 'book'),
-        commentaries: secondaryData.filter(r => normalize(r.type) === 'commentary'),
-        devotionals: secondaryData.filter(r => normalize(r.type) === 'devotional'),
-        videos: secondaryData.filter(r => normalize(r.type) === 'video'),
-      };
+        const secondaryData = data.filter(resource => {
+          if (!resource.secondary_scripture) return false;
+          
+          console.log(`\nChecking resource: "${resource.title}"`);
+          console.log(`  Secondary scripture: "${resource.secondary_scripture}"`);
+          
+          const secondaryMatch = parseSecondaryScripture(resource.secondary_scripture, selectedBook, selectedChapterNum);
+          console.log(`  Match result: ${secondaryMatch}`);
+          
+          return secondaryMatch;
+        });
 
-      setPrimaryResources(groupedPrimaryResources);
-      setSecondaryResources(groupedSecondaryResources);
+        console.log("Primary Resources:", primaryData);
+        console.log("Secondary Resources:", secondaryData);
+
+        const normalize = (str) => str.toLowerCase().trim().replace(/s$/, '');
+
+        // Group primary resources by type
+        const groupedPrimaryResources = {
+          sermons: primaryData.filter(r => normalize(r.type) === 'sermon'),
+          books: primaryData.filter(r => normalize(r.type) === 'book'),
+          commentaries: primaryData.filter(r => normalize(r.type) === 'commentary'),
+          devotionals: primaryData.filter(r => normalize(r.type) === 'devotional'),
+          videos: primaryData.filter(r => normalize(r.type) === 'video'),
+        };
+
+        // Group secondary resources by type
+        const groupedSecondaryResources = {
+          sermons: secondaryData.filter(r => normalize(r.type) === 'sermon'),
+          books: secondaryData.filter(r => normalize(r.type) === 'book'),
+          commentaries: secondaryData.filter(r => normalize(r.type) === 'commentary'),
+          devotionals: secondaryData.filter(r => normalize(r.type) === 'devotional'),
+          videos: secondaryData.filter(r => normalize(r.type) === 'video'),
+        };
+
+        setPrimaryResources(groupedPrimaryResources);
+        setSecondaryResources(groupedSecondaryResources);
+        
+        // Clear author-only resources when in scripture mode
+        setAuthorOnlyResources({
+          sermons: [], commentaries: [], devotionals: [], books: [], videos: []
+        });
+      }
     } catch (err) {
       setError(`Error fetching resources: ${err.message}`);
       console.error('Error:', err);
@@ -154,7 +229,7 @@ function App() {
 
   useEffect(() => {
     fetchResources();
-  }, [selectedBook, selectedChapter]);
+  }, [selectedBook, selectedChapter, filters.authors, isAuthorOnlyMode]);
 
   // Fetch all authors on component mount
   useEffect(() => {
@@ -178,9 +253,12 @@ function App() {
         const filterType = getFilterType(item.type);
         const typeMatch = filters.types.has(filterType);
         
-        // Author filter - improved to handle actual database authors
-        const authorMatch = filters.authors.size === 0 || 
-          (item.author && filters.authors.has(item.author.trim()));
+        // Author filter - in author-only mode, this is already handled by fetchResources
+        // For scripture mode, apply author filter if any authors are selected
+        let authorMatch = true;
+        if (!isAuthorOnlyMode && filters.authors.size > 0) {
+          authorMatch = item.author && filters.authors.has(item.author.trim());
+        }
         
         // Price filter
         let priceMatch = true;
@@ -213,17 +291,20 @@ function App() {
           });
           break;
         case 'scripture':
-          filtered.sort((a, b) => {
-            const aChapter = parseInt(a.chapter) || 0;
-            const bChapter = parseInt(b.chapter) || 0;
+          // Only sort by scripture if we're not in author-only mode
+          if (!isAuthorOnlyMode) {
+            filtered.sort((a, b) => {
+              const aChapter = parseInt(a.chapter) || 0;
+              const bChapter = parseInt(b.chapter) || 0;
 
-            if (aChapter !== bChapter) return aChapter - bChapter;
+              if (aChapter !== bChapter) return aChapter - bChapter;
 
-            const aVerse = parseInt(a.verse_start) || 0;
-            const bVerse = parseInt(b.verse_start) || 0;
+              const aVerse = parseInt(a.verse_start) || 0;
+              const bVerse = parseInt(b.verse_start) || 0;
 
-            return aVerse - bVerse;
-          });
+              return aVerse - bVerse;
+            });
+          }
           break;
         default:
           // Default order - no sorting
@@ -232,7 +313,7 @@ function App() {
 
       return filtered;
     };
-  }, [filters, sortBy]);
+  }, [filters, sortBy, isAuthorOnlyMode]);
 
   const addResource = async (resourceData) => {
     try {
@@ -481,10 +562,12 @@ function App() {
     );
   };
 
-  const ResourceGrid = ({ title, primaryItems, secondaryItems }) => {
+  const ResourceGrid = ({ title, primaryItems, secondaryItems, authorOnlyItems }) => {
     const filteredPrimaryItems = filterAndSortResources(primaryItems);
     const filteredSecondaryItems = filterAndSortResources(secondaryItems);
-    const totalItems = filteredPrimaryItems.length + filteredSecondaryItems.length;
+    const filteredAuthorOnlyItems = filterAndSortResources(authorOnlyItems || []);
+    
+    const totalItems = filteredPrimaryItems.length + filteredSecondaryItems.length + filteredAuthorOnlyItems.length;
 
     return (
       <section
@@ -509,12 +592,17 @@ function App() {
           </p>
         ) : (
           <div>
-            {/* Primary scripture resources first */}
+            {/* Author-only resources first when in author-only mode */}
+            {filteredAuthorOnlyItems.map((resource) => (
+              <ResourceCard key={`author-only-${resource.id}`} resource={resource} />
+            ))}
+            
+            {/* Primary scripture resources */}
             {filteredPrimaryItems.map((resource) => (
               <ResourceCard key={`primary-${resource.id}`} resource={resource} />
             ))}
             
-            {/* Secondary scripture resources below */}
+            {/* Secondary scripture resources */}
             {filteredSecondaryItems.map((resource) => (
               <ResourceCard key={`secondary-${resource.id}`} resource={resource} isSecondary={true} />
             ))}
@@ -524,13 +612,34 @@ function App() {
     );
   };
 
+  // Determine what message to show when no resources are displayed
+  const getNoResourcesMessage = () => {
+    if (isAuthorOnlyMode) {
+      const selectedAuthorsArray = Array.from(filters.authors);
+      return `Showing all resources by ${selectedAuthorsArray.join(', ')}`;
+    }
+    
+    if (!selectedBook && !selectedChapter && filters.authors.size === 0) {
+      return "Please select a book and chapter to view resources, or filter by author to see all resources by that author.";
+    }
+    
+    if (selectedBook && !selectedChapter) {
+      return "Please select a chapter to view resources.";
+    }
+    
+    return "Please select a book and chapter to view resources.";
+  };
+
+  // Determine if we should show resources
+  const shouldShowResources = selectedBook && selectedChapter || isAuthorOnlyMode;
+
   return (
     <div style={{ padding: "0rem 2rem 2rem", textAlign: "center" }}>
       <Header />
-      {loading && selectedBook && selectedChapter && (
+      {loading && (selectedBook && selectedChapter || isAuthorOnlyMode) && (
         <LoadingScreen 
-          selectedBook={selectedBook} 
-          selectedChapter={selectedChapter}
+          selectedBook={isAuthorOnlyMode ? "Author Resources" : selectedBook} 
+          selectedChapter={isAuthorOnlyMode ? Array.from(filters.authors).join(', ') : selectedChapter}
           faviconUrl="/favicon.ico"
         />
       )}
@@ -551,99 +660,99 @@ function App() {
       )}
 
       <div style={{ paddingTop: "80px", textAlign: "center" }}>
-  {/* Wrapper for Intro + selects */}
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: "36px", // very small vertical gap
-      maxWidth: "900px",
-      marginLeft: "auto",
-      marginRight: "auto",
-    }}
-  >
-    {/* Intro bubble */}
-    <Intro />
-
-    {/* Book and Chapter selects */}
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        gap: "1rem", // horizontal spacing between selects
-        flexWrap: "wrap",
-        alignItems: "center",
-      }}
-    >
-      {/* Book select */}
-      <div>
-        <label htmlFor="book-select" style={{ fontWeight: "bold", color:"black" }}>
-          Choose a book:
-        </label>
-        <br />
-        <select
-          id="book-select"
-          value={selectedBook}
-          onChange={(e) => {
-            setSelectedBook(e.target.value);
-            setSelectedChapter("");
-          }}
+        {/* Wrapper for Intro + selects */}
+        <div
           style={{
-            padding: "0.6rem 1rem",
-            fontSize: "1rem",
-            borderRadius: "12px",
-            border: "1.5px solid black",
-            backgroundColor: "white",
-            cursor: "pointer",
-            outline: "none",
-            transition: "all 0.3s ease",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "36px", // very small vertical gap
+            maxWidth: "900px",
+            marginLeft: "auto",
+            marginRight: "auto",
           }}
         >
-          <option value="">-- Book --</option>
-          {bibleBooks.map((book) => (
-            <option key={book.name} value={book.name}>
-              {book.name}
-            </option>
-          ))}
-        </select>
-      </div>
+          {/* Intro bubble */}
+          <Intro />
 
-      {/* Chapter select */}
-      <div>
-        <label htmlFor="chapter-select" style={{ fontWeight: "bold" }}>
-          Choose a chapter:
-        </label>
-        <br />
-        <select
-          id="chapter-select"
-          value={selectedChapter}
-          onChange={(e) => setSelectedChapter(parseInt(e.target.value))}
-          disabled={!selectedBook}
-          style={{
-            padding: "0.6rem 1rem",
-            fontSize: "1rem",
-            borderRadius: "12px",
-            border: "1.5px solid black",
-            backgroundColor: "white",
-            cursor: "pointer",
-            outline: "none",
-            transition: "all 0.3s ease",
-          }}
-        >
-          <option value="">##</option>
-          {Array.from({ length: chaptersCount }, (_, i) => i + 1).map(
-            (num) => (
-              <option key={num} value={num}>
-                {num}
-              </option>
-            )
-          )}
-        </select>
+          {/* Book and Chapter selects */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "1rem", // horizontal spacing between selects
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
+            {/* Book select */}
+            <div>
+              <label htmlFor="book-select" style={{ fontWeight: "bold", color:"black" }}>
+                Choose a book:
+              </label>
+              <br />
+              <select
+                id="book-select"
+                value={selectedBook}
+                onChange={(e) => {
+                  setSelectedBook(e.target.value);
+                  setSelectedChapter("");
+                }}
+                style={{
+                  padding: "0.6rem 1rem",
+                  fontSize: "1rem",
+                  borderRadius: "12px",
+                  border: "1.5px solid black",
+                  backgroundColor: "white",
+                  cursor: "pointer",
+                  outline: "none",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <option value="">-- Book --</option>
+                {bibleBooks.map((book) => (
+                  <option key={book.name} value={book.name}>
+                    {book.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Chapter select */}
+            <div>
+              <label htmlFor="chapter-select" style={{ fontWeight: "bold" }}>
+                Choose a chapter:
+              </label>
+              <br />
+              <select
+                id="chapter-select"
+                value={selectedChapter}
+                onChange={(e) => setSelectedChapter(parseInt(e.target.value))}
+                disabled={!selectedBook}
+                style={{
+                  padding: "0.6rem 1rem",
+                  fontSize: "1rem",
+                  borderRadius: "12px",
+                  border: "1.5px solid black",
+                  backgroundColor: "white",
+                  cursor: "pointer",
+                  outline: "none",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <option value="">##</option>
+                {Array.from({ length: chaptersCount }, (_, i) => i + 1).map(
+                  (num) => (
+                    <option key={num} value={num}>
+                      {num}
+                    </option>
+                  )
+                )}
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
       
       <div
         style={{
@@ -664,8 +773,23 @@ function App() {
           availableAuthors={availableAuthors}
         />
         
-        {selectedBook && selectedChapter && (
+        {shouldShowResources && (
           <>
+            {/* Show status message for author-only mode */}
+            {isAuthorOnlyMode && (
+              <div style={{
+                backgroundColor: "#e3f2fd",
+                color: "#1976d2",
+                padding: "1rem",
+                borderRadius: "8px",
+                margin: "1rem 0",
+                textAlign: "center",
+                fontWeight: "500"
+              }}>
+                {getNoResourcesMessage()}
+              </div>
+            )}
+            
             {Object.keys(typeLabels).map((typeKey) => {
               if (!filters.types.has(typeKey)) return null;
 
@@ -675,20 +799,21 @@ function App() {
                   title={typeLabels[typeKey]}
                   primaryItems={primaryResources[typeKey] || []}
                   secondaryItems={secondaryResources[typeKey] || []}
+                  authorOnlyItems={authorOnlyResources[typeKey] || []}
                 />
               );
             })}
           </>
         )}
         
-        {(!selectedBook || !selectedChapter) && (
+        {!shouldShowResources && (
           <p style={{ 
             textAlign: "center", 
             color: "#666", 
             fontStyle: "italic",
             padding: "2rem"
           }}>
-            Please select a book and chapter to view resources.
+            {getNoResourcesMessage()}
           </p>
         )}
       </div>
