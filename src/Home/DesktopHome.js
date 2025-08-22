@@ -22,6 +22,9 @@ function App() {
     price: new Set()
   });
 
+  // Add state to track available authors from database
+  const [availableAuthors, setAvailableAuthors] = useState(new Set());
+
   // Separate state for primary and secondary scripture resources
   const [primaryResources, setPrimaryResources] = useState({
     sermons: [],
@@ -60,6 +63,15 @@ function App() {
       if (error) throw error;
 
       console.log("Data from Supabase:", data);
+      
+      // Extract unique authors from all data and update availableAuthors
+      const uniqueAuthors = new Set();
+      data.forEach(resource => {
+        if (resource.author && resource.author.trim() !== '') {
+          uniqueAuthors.add(resource.author.trim());
+        }
+      });
+      setAvailableAuthors(uniqueAuthors);
       
       const primaryData = data.filter(resource => {
         if (resource.book !== selectedBook) return false;
@@ -117,9 +129,37 @@ function App() {
     }
   };
 
+  // Optional: Fetch all authors on component mount for immediate availability
+  const fetchAllAuthors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('resources')
+        .select('author')
+        .not('author', 'is', null)
+        .not('author', 'eq', '');
+
+      if (error) throw error;
+
+      const uniqueAuthors = new Set();
+      data.forEach(resource => {
+        if (resource.author && resource.author.trim() !== '') {
+          uniqueAuthors.add(resource.author.trim());
+        }
+      });
+      setAvailableAuthors(uniqueAuthors);
+    } catch (err) {
+      console.error('Error fetching authors:', err);
+    }
+  };
+
   useEffect(() => {
     fetchResources();
   }, [selectedBook, selectedChapter]);
+
+  // Fetch all authors on component mount
+  useEffect(() => {
+    fetchAllAuthors();
+  }, []);
 
   // Improved filtering and sorting function
   const filterAndSortResources = useMemo(() => {
@@ -138,8 +178,9 @@ function App() {
         const filterType = getFilterType(item.type);
         const typeMatch = filters.types.has(filterType);
         
-        // Author filter
-        const authorMatch = filters.authors.size === 0 || filters.authors.has(item.author);
+        // Author filter - improved to handle actual database authors
+        const authorMatch = filters.authors.size === 0 || 
+          (item.author && filters.authors.has(item.author.trim()));
         
         // Price filter
         let priceMatch = true;
@@ -613,13 +654,14 @@ function App() {
           textAlign: "left",
         }}
       >
-        {/* Use the SortFilter component */}
+        {/* Use the SortFilter component - now with availableAuthors */}
         <SortFilter 
           sortBy={sortBy}
           setSortBy={setSortBy}
           filters={filters}
           setFilters={setFilters}
           toggleFilter={toggleFilter}
+          availableAuthors={availableAuthors}
         />
         
         {selectedBook && selectedChapter && (

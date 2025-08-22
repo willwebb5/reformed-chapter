@@ -20,11 +20,39 @@ function MobileHome() {
     price: new Set(),
   });
 
+  // Add state to track available authors from database
+  const [availableAuthors, setAvailableAuthors] = useState(new Set());
+
   const [primaryResources, setPrimaryResources] = useState({});
   const [secondaryResources, setSecondaryResources] = useState({});
 
   const chaptersCount =
     bibleBooks.find((book) => book.name === selectedBook)?.chapters || 0;
+
+  // -----------------------
+  // Fetch All Authors (on component mount)
+  // -----------------------
+  const fetchAllAuthors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('resources')
+        .select('author')
+        .not('author', 'is', null)
+        .not('author', 'eq', '');
+
+      if (error) throw error;
+
+      const uniqueAuthors = new Set();
+      data.forEach(resource => {
+        if (resource.author && resource.author.trim() !== '') {
+          uniqueAuthors.add(resource.author.trim());
+        }
+      });
+      setAvailableAuthors(uniqueAuthors);
+    } catch (err) {
+      console.error('Error fetching authors:', err);
+    }
+  };
 
   // -----------------------
   // Fetch Resources
@@ -44,6 +72,15 @@ function MobileHome() {
         .limit(10000);
 
       if (error) throw error;
+
+      // Extract unique authors from all data and update availableAuthors
+      const uniqueAuthors = new Set();
+      data.forEach(resource => {
+        if (resource.author && resource.author.trim() !== '') {
+          uniqueAuthors.add(resource.author.trim());
+        }
+      });
+      setAvailableAuthors(uniqueAuthors);
 
       // Primary match
       const primaryData = data.filter((r) => {
@@ -90,6 +127,11 @@ function MobileHome() {
     fetchResources();
   }, [selectedBook, selectedChapter]);
 
+  // Fetch all authors on component mount
+  useEffect(() => {
+    fetchAllAuthors();
+  }, []);
+
   // -----------------------
   // Filtering & Sorting
   // -----------------------
@@ -105,8 +147,10 @@ function MobileHome() {
             : normalize(dbType) + "s";
 
         const typeMatch = filters.types.has(getFilterType(item.type));
-        const authorMatch =
-          filters.authors.size === 0 || filters.authors.has(item.author);
+        
+        // Author filter - improved to handle actual database authors
+        const authorMatch = filters.authors.size === 0 || 
+          (item.author && filters.authors.has(item.author.trim()));
 
         let priceMatch = true;
         if (filters.price.size > 0) {
@@ -317,13 +361,14 @@ function MobileHome() {
         </select>
       </div>
 
-      {/* Sort & Filter */}
+      {/* Sort & Filter - now with availableAuthors */}
       <SortFilter
         sortBy={sortBy}
         setSortBy={setSortBy}
         filters={filters}
         setFilters={setFilters}
         toggleFilter={toggleFilter}
+        availableAuthors={availableAuthors}
       />
 
       {/* Resource Display */}
@@ -334,7 +379,7 @@ function MobileHome() {
             primaryResources[key] && (
               <div key={key}>
                 <h3 style={{ textAlign: "left", color: "#000" }}>
-                  {typeLabels[key]} ({primaryResources[key].length})
+                  {typeLabels[key]} ({filterAndSortResources(primaryResources[key]).length})
                 </h3>
                 {filterAndSortResources(primaryResources[key]).map((res) => (
                   <ResourceCard key={res.id} resource={res} />
@@ -352,4 +397,3 @@ function MobileHome() {
 }
 
 export default MobileHome;
-
