@@ -6,6 +6,7 @@ import {
   useStripe,
   useElements
 } from '@stripe/react-stripe-js';
+import Header from './Header/Header';
 
 // Load Stripe outside of component to avoid recreating on every render
 const publishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
@@ -152,6 +153,7 @@ const ReformedChapterDonate = () => {
 
   return (
     <div className="page-container">
+      
       {/* Support Message Bubble */}
       <div className="support-message">
         <h2>Supporting Reformed Chapter</h2>
@@ -564,6 +566,7 @@ const ReformedChapterDonate = () => {
         }
       `}</style>
     </div>
+    
   );
 };
 

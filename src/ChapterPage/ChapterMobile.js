@@ -1,33 +1,58 @@
+// ChapterMobile.js
+import SEOHead from '../SEOHead';
 import React, { useState, useEffect, useMemo } from "react";
-import { supabase } from "../SupaBaseInfo";
+import { useParams, Link } from "react-router-dom";
 import Header from "../Header/Header";
-import Intro from "../Intro";
 import LoadingScreen from "../LoadingScreen";
 import SortFilter from "../SortFilter";
-import { typeLabels, bibleBooks, resourceTypes } from "../Constants";
+import { supabase } from "../SupaBaseInfo";
+import Intro from "../Intro";
+import {
+  typeLabels,
+  bibleBooks,
+  resourceTypes,
+  urlToBook,
+} from "../Constants";
 import { parseSecondaryScripture } from "../Logic";
 
-function MobileHome() {
-  const [selectedBook, setSelectedBook] = useState("");
-  const [selectedChapter, setSelectedChapter] = useState("");
+function ChapterMobile() {
+  const { book, chapter } = useParams();
+  const bookName = urlToBook(book);
+  const chapterNum = parseInt(chapter);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const [sortBy, setSortBy] = useState("");
   const [filters, setFilters] = useState({
     types: new Set(resourceTypes.map((t) => t.toLowerCase())),
     authors: new Set(),
     price: new Set(),
   });
-
-  // Add state to track available authors from database
   const [availableAuthors, setAvailableAuthors] = useState(new Set());
+  const [primaryResources, setPrimaryResources] = useState({
+    sermons: [],
+    commentaries: [],
+    devotionals: [],
+    books: [],
+    videos: [],
+  });
+  const [secondaryResources, setSecondaryResources] = useState({
+    sermons: [],
+    commentaries: [],
+    devotionals: [],
+    books: [],
+    videos: [],
+  });
 
-  const [primaryResources, setPrimaryResources] = useState({});
-  const [secondaryResources, setSecondaryResources] = useState({});
+  // Add selected book/chapter state for the dropdowns
+  const [selectedBook, setSelectedBook] = useState(bookName);
+  const [selectedChapter, setSelectedChapter] = useState(chapterNum);
 
-  const chaptersCount =
-    bibleBooks.find((book) => book.name === selectedBook)?.chapters || 0;
+  const bookInfo = bibleBooks.find((b) => b.name === bookName);
+  const totalChapters = bookInfo?.chapters || 1;
+  const chaptersCount = bibleBooks.find((book) => book.name === selectedBook)?.chapters || 0;
+
+  const normalize = (str) => str.toLowerCase().trim().replace(/s$/, "");
 
   // -----------------------
   // Fetch All Authors (on component mount)
@@ -54,23 +79,14 @@ function MobileHome() {
     }
   };
 
-  // -----------------------
-  // Fetch Resources
-  // -----------------------
   const fetchResources = async () => {
-    if (!selectedBook || !selectedChapter) return;
+    if (!bookName || !chapterNum) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const selectedChapterNum = parseInt(selectedChapter);
-
-      const { data, error } = await supabase
-        .from("resources")
-        .select("*")
-        .limit(10000);
-
+      const { data, error } = await supabase.from("resources").select("*").limit(10000);
       if (error) throw error;
 
       // Extract unique authors from all data and update availableAuthors
@@ -82,42 +98,47 @@ function MobileHome() {
       });
       setAvailableAuthors(uniqueAuthors);
 
-      // Primary match
-      const primaryData = data.filter((r) => {
-        if (r.book !== selectedBook) return false;
-        if (!r.chapter) return true;
-
-        const start = parseInt(r.chapter);
-        const end = r.chapter_end ? parseInt(r.chapter_end) : start;
-        return selectedChapterNum >= start && selectedChapterNum <= end;
+      // Helper to map resource fields
+      const processResource = (r) => ({
+        ...r,
+        formattedReference: r.reference || "",
+        secondary_scripture: r.secondary_scripture || "",
       });
 
-      // Secondary match
-      const secondaryData = data.filter((r) =>
-        r.secondary_scripture
-          ? parseSecondaryScripture(
-              r.secondary_scripture,
-              selectedBook,
-              selectedChapterNum
-            )
-          : false
-      );
+      // Filter primary resources for this chapter
+      const primaryData = data
+        .filter((r) => {
+          if (r.book !== bookName) return false;
+          if (!r.chapter) return true;
+          const start = parseInt(r.chapter);
+          const end = r.chapter_end ? parseInt(r.chapter_end) : start;
+          return chapterNum >= start && chapterNum <= end;
+        })
+        .map(processResource);
 
-      const normalize = (str) =>
-        str.toLowerCase().trim().replace(/s$/, "");
+      // Filter secondary resources
+      const secondaryData = data
+        .filter(
+          (r) =>
+            r.secondary_scripture &&
+            parseSecondaryScripture(r.secondary_scripture, bookName, chapterNum)
+        )
+        .map(processResource);
 
-      const groupByType = (list) => ({
-        sermons: list.filter((r) => normalize(r.type) === "sermon"),
-        books: list.filter((r) => normalize(r.type) === "book"),
-        commentaries: list.filter((r) => normalize(r.type) === "commentary"),
-        devotionals: list.filter((r) => normalize(r.type) === "devotional"),
-        videos: list.filter((r) => normalize(r.type) === "video"),
+      // Group by type
+      const groupResources = (items) => ({
+        sermons: items.filter((r) => normalize(r.type) === "sermon"),
+        commentaries: items.filter((r) => normalize(r.type) === "commentary"),
+        devotionals: items.filter((r) => normalize(r.type) === "devotional"),
+        books: items.filter((r) => normalize(r.type) === "book"),
+        videos: items.filter((r) => normalize(r.type) === "video"),
       });
 
-      setPrimaryResources(groupByType(primaryData));
-      setSecondaryResources(groupByType(secondaryData));
+      setPrimaryResources(groupResources(primaryData));
+      setSecondaryResources(groupResources(secondaryData));
     } catch (err) {
       setError(`Error fetching resources: ${err.message}`);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -125,12 +146,18 @@ function MobileHome() {
 
   useEffect(() => {
     fetchResources();
-  }, [selectedBook, selectedChapter]);
+  }, [bookName, chapterNum]);
 
   // Fetch all authors on component mount
   useEffect(() => {
     fetchAllAuthors();
   }, []);
+
+  // Update selected states when URL changes
+  useEffect(() => {
+    if (bookName) setSelectedBook(bookName);
+    if (chapterNum && !isNaN(chapterNum)) setSelectedChapter(chapterNum);
+  }, [bookName, chapterNum]);
 
   // -----------------------
   // Filtering & Sorting
@@ -198,9 +225,6 @@ function MobileHome() {
     };
   }, [filters, sortBy]);
 
-  // -----------------------
-  // Toggle Filter
-  // -----------------------
   const toggleFilter = (category, value) => {
     setFilters((prev) => {
       const newSet = new Set(prev[category]);
@@ -209,10 +233,17 @@ function MobileHome() {
     });
   };
 
+  const prevChapter = chapterNum > 1 ? chapterNum - 1 : null;
+  const nextChapter = chapterNum < totalChapters ? chapterNum + 1 : null;
+
+  if (!bookName) return <div>Book not found</div>;
+
   // -----------------------
   // Resource Card
   // -----------------------
   const ResourceCard = ({ resource }) => {
+    const { title, author, url, image } = resource;
+
     return (
       <div
         style={{
@@ -229,8 +260,8 @@ function MobileHome() {
       >
         {/* Image */}
         <img
-          src={resource.image || "/placeholder.png"}
-          alt={resource.title}
+          src={image || "/placeholder.png"}
+          alt={title}
           style={{
             width: "70px",
             height: "70px",
@@ -241,9 +272,9 @@ function MobileHome() {
 
         {/* Text */}
         <div style={{ flex: 1, textAlign: "left" }}>
-          {resource.url ? (
+          {url ? (
             <a
-              href={resource.url}
+              href={url}
               target="_blank"
               rel="noreferrer"
               style={{
@@ -253,24 +284,25 @@ function MobileHome() {
                 textDecoration: "none",
               }}
             >
-              {resource.title}
+              {title}
             </a>
           ) : (
             <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: "600" }}>
-              {resource.title}
+              {title}
             </h4>
           )}
-          <p style={{ margin: "0.2rem 0", fontSize: "0.85rem", color: "#555" }}>
-            {resource.author}
-          </p>
+          
+          {/* Author */}
+          {author && (
+            <p style={{ margin: "0.2rem 0", fontSize: "0.85rem", color: "#555" }}>
+              {author}
+            </p>
+          )}
         </div>
       </div>
     );
   };
 
-  // -----------------------
-  // UI
-  // -----------------------
   return (
     <div
       style={{
@@ -280,29 +312,29 @@ function MobileHome() {
         margin: "0 auto",
       }}
     >
-      {/* Add spacing so Intro isn't cut off */}
-      <div style={{ marginTop: "2.5rem" ,marginBottom:"1rem"}}>
+      <Header />
+      
+      {/* Reduced spacing between header and intro */}
+      <div style={{ marginTop: "0.75rem", marginBottom: "1rem" }}>
         <Intro />
       </div>
 
       {loading && selectedBook && selectedChapter && (
-        <LoadingScreen
-          selectedBook={selectedBook}
-          selectedChapter={selectedChapter}
-          faviconUrl="/favicon.ico"
+        <LoadingScreen 
+          selectedBook={selectedBook} 
+          selectedChapter={selectedChapter} 
+          faviconUrl="/favicon.ico" 
         />
       )}
-
+      
       {error && (
-        <div
-          style={{
-            backgroundColor: "#ffebee",
-            color: "#c62828",
-            padding: "0.8rem",
-            borderRadius: "4px",
-            margin: "1rem 0",
-          }}
-        >
+        <div style={{
+          backgroundColor: "#ffebee",
+          color: "#c62828",
+          padding: "0.8rem",
+          borderRadius: "4px",
+          margin: "1rem 0",
+        }}>
           {error}
         </div>
       )}
@@ -395,4 +427,4 @@ function MobileHome() {
   );
 }
 
-export default MobileHome;
+export default ChapterMobile;

@@ -1,5 +1,4 @@
 
-
 export const typeLabels = {
   sermons: "Sermons",
   books: "Books",
@@ -94,3 +93,17 @@ export const resourceTypes = [
   "Books",
   "Videos"
 ];
+
+export const bookToUrl = (bookName) => {
+  return bookName
+    .toLowerCase()
+    .replace(/\s+/g, '-')     // Should convert spaces to hyphens
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+};
+
+export const urlToBook = (urlSlug) => {
+  const book = bibleBooks.find(book => bookToUrl(book.name) === urlSlug);
+  return book ? book.name : null;
+};

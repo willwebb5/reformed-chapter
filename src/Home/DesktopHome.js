@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { createClient } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
 import Header from '../Header/Header';
 import LoadingScreen from '../LoadingScreen';
-import { typeLabels, bibleBooks, exampleAuthors, resourceTypes } from '../Constants';
+import { typeLabels, bibleBooks, resourceTypes, bookToUrl } from '../Constants';
 import SortFilter from '../SortFilter';
 import Intro from "../Intro";
-import { supabase } from '../SupaBaseInfo'; // adjust the path to where your file actually is
-import { parseSecondaryScripture, sortByVerse, normalizeBookName } from '../Logic';
+import { supabase } from '../SupaBaseInfo';
+import { parseSecondaryScripture } from '../Logic';
+import Footer from "../Footer/DesktopFooter";
+
 
 function App() {
+  const navigate = useNavigate(); // Add this hook
   const [selectedBook, setSelectedBook] = useState("");
   const [selectedChapter, setSelectedChapter] = useState("");
   const [loading, setLoading] = useState(false);
@@ -58,6 +61,14 @@ function App() {
   const isAuthorOnlyMode = useMemo(() => {
     return filters.authors.size > 0 && (!selectedBook || !selectedChapter);
   }, [filters.authors, selectedBook, selectedChapter]);
+
+  // Add navigation effect when both book and chapter are selected
+  useEffect(() => {
+    if (selectedBook && selectedChapter) {
+      const urlBook = bookToUrl(selectedBook);
+      navigate(`/${urlBook}/${selectedChapter}`);
+    }
+  }, [selectedBook, selectedChapter, navigate]);
 
   const fetchResources = async () => {
     // If neither book/chapter nor author is selected, don't fetch
@@ -635,7 +646,6 @@ function App() {
 
   return (
     <div style={{ padding: "0rem 2rem 2rem", textAlign: "center" }}>
-      <Header />
       {loading && (selectedBook && selectedChapter || isAuthorOnlyMode) && (
         <LoadingScreen 
           selectedBook={isAuthorOnlyMode ? "Author Resources" : selectedBook} 
