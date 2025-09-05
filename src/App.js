@@ -1,44 +1,61 @@
-/// Fixed App.js with proper routing, React Helmet setup, global header and footer
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Helmet, HelmetProvider } from "@vuer-ai/react-helmet-async";
-import Home from './Home/Home'; // Your existing responsive component
-import ChapterDesktop from './ChapterPage/ChapterDesktop'; // Your chapter component
-import About from "./About";
-import Donate from "./Donate";
-import SubmitResource from "./SubmitResource";
+// App.js - fixed with routing, Vuer Helmet, header/footer, and GA4 analytics
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { HelmetProvider } from "@vuer-ai/react-helmet-async";
+import ReactGA from 'react-ga4';
+
+import Home from './Home/Home';
+import ChapterDesktop from './ChapterPage/ChapterDesktop';
 import ChapterPage from './ChapterPage/ChapterPage';
-import Footer from './Footer/Footer'; // Import your footer component
-import Header from './Header/Header'; // Import your header component
+import About from './About';
+import Donate from './Donate';
+import SubmitResource from './SubmitResource';
+import Header from './Header/Header';
+import Footer from './Footer/Footer';
+
+// Initialize GA4 with your Measurement ID
+ReactGA.initialize('G-E8B7GY44QG'); // <-- replace with your GA4 Measurement ID
+
+// Component to track pageviews on route changes
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    ReactGA.send({ hitType: 'pageview', page: location.pathname + location.search });
+  }, [location]);
+
+  return null;
+}
 
 function App() {
   return (
     <HelmetProvider>
       <Router>
+        <AnalyticsTracker />
         <div className="app-container">
-          {/* Header will appear on every page */}
+          {/* Global header */}
           <Header />
-          
-          {/* All your page content */}
+
+          {/* Main content / routes */}
           <main>
             <Routes>
-              {/* Home page - must come after specific routes */}
-              <Route path="/" element={<Home />} />
-              
-              {/* About, Donate, Submit pages */}
+              {/* Specific pages */}
               <Route path="/about" element={<About />} />
               <Route path="/donate" element={<Donate />} />
-              <Route path="/SubmitResource" element={<SubmitResource />} />
-              
-              {/* Chapter pages - specific book/chapter combinations */}
+              <Route path="/submitresource" element={<SubmitResource />} />
+
+              {/* Chapter pages */}
               <Route path="/:book/:chapter" element={<ChapterPage />} />
-              
-              {/* Optional: Catch-all route for 404 */}
+
+              {/* Home page */}
+              <Route path="/" element={<Home />} />
+
+              {/* Catch-all 404 */}
               <Route path="*" element={<div>Page not found</div>} />
             </Routes>
           </main>
-          
-          {/* Footer will appear on every page */}
+
+          {/* Global footer */}
           <Footer />
         </div>
       </Router>
