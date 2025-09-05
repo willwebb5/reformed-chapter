@@ -1,7 +1,7 @@
 /// Fixed App.js with proper routing, React Helmet setup, global header and footer
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
+import { Helmet, HelmetProvider } from "@vuer-ai/react-helmet-async";
 import Home from './Home/Home'; // Your existing responsive component
 import ChapterDesktop from './ChapterPage/ChapterDesktop'; // Your chapter component
 import About from "./About";
