@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from "@vuer-ai/react-helmet-async";
 import ReactGA from 'react-ga4';
-
 import Home from './Home/Home';
 import ChapterDesktop from './ChapterPage/ChapterDesktop';
 import ChapterPage from './ChapterPage/ChapterPage';
