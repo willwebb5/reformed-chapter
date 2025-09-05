@@ -1,6 +1,7 @@
 // src/SEOHead.js
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import { Helmet, HelmetProvider } from "@vuer-ai/react-helmet-async";
+
 
 const SEOHead = ({ 
   title, 
