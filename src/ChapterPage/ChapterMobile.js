@@ -287,7 +287,7 @@ function ChapterMobile() {
               {title}
             </a>
           ) : (
-            <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: "600" }}>
+            <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: "600", color: "#333" }}>
               {title}
             </h4>
           )}
@@ -310,6 +310,9 @@ function ChapterMobile() {
         textAlign: "center",
         maxWidth: "500px",
         margin: "0 auto",
+        backgroundColor: "#fff",
+        minHeight: "100vh",
+        color: "#333",
       }}
     >
       <Header />
@@ -360,6 +363,10 @@ function ChapterMobile() {
             borderRadius: "10px",
             border: "1px solid #ccc",
             fontSize: "1rem",
+            backgroundColor: "#fff",
+            color: "#333",
+            WebkitAppearance: "none",
+            appearance: "none",
           }}
         >
           <option value="">📖 Choose a book...</option>
@@ -381,6 +388,9 @@ function ChapterMobile() {
             border: "1px solid #ccc",
             fontSize: "1rem",
             backgroundColor: !selectedBook ? "#f5f5f5" : "#fff",
+            color: "#333",
+            WebkitAppearance: "none",
+            appearance: "none",
           }}
         >
           <option value=""># Choose a chapter...</option>
@@ -408,8 +418,8 @@ function ChapterMobile() {
           (key) =>
             filters.types.has(key) &&
             primaryResources[key] && (
-              <div key={key}>
-                <h3 style={{ textAlign: "left", color: "#000" }}>
+              <div key={key} style={{ backgroundColor: "#fff" }}>
+                <h3 style={{ textAlign: "left", color: "#333", backgroundColor: "#fff" }}>
                   {typeLabels[key]} ({filterAndSortResources(primaryResources[key]).length})
                 </h3>
                 {filterAndSortResources(primaryResources[key]).map((res) => (
@@ -419,7 +429,7 @@ function ChapterMobile() {
             )
         )
       ) : (
-        <p style={{ fontStyle: "italic", color: "#666", padding: "1rem" }}>
+        <p style={{ fontStyle: "italic", color: "#666", padding: "1rem", backgroundColor: "#fff" }}>
           Please select a book and chapter to view resources.
         </p>
       )}
