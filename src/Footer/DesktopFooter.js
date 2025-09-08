@@ -4,26 +4,36 @@ export default function Footer() {
   return (
     <footer
       style={{
-        width: "100%",
+        width: "100vw", // Full viewport width
         backgroundColor: "black",
         color: "#ddd",
         padding: "2rem 1rem",
         boxShadow: "0 -1px 6px rgba(0,0,0,0.1)",
         textAlign: "center",
+        boxSizing: "border-box", // Include padding in width calculation
+        overflowX: "hidden", // Hide any horizontal overflow
+        margin: "0", // Remove any default margins
+        position: "relative",
+        left: "50%",
+        right: "50%",
+        marginLeft: "-50vw",
+        marginRight: "-50vw",
       }}
     >
       <div
         style={{
-          maxWidth: "800px",
+          maxWidth: "min(800px, 90vw)", // Responsive max width
           margin: "0 auto",
           display: "flex",
           flexDirection: "column",
           gap: "2rem",
           alignItems: "center",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {/* Site Title + Navigation */}
-        <div>
+        <div style={{ width: "100%", boxSizing: "border-box" }}>
           <div
             style={{
               marginBottom: "0.5rem",
@@ -42,6 +52,8 @@ export default function Footer() {
               flexWrap: "wrap",
               gap: "1rem",
               fontSize: "0.95rem",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           >
             <a href="/" style={linkStyle}>Home</a>
@@ -68,7 +80,10 @@ export default function Footer() {
             borderRadius: "10px",
             padding: "4px",              // Space between outer and inner border
             backgroundColor: "black",
-            display: "inline-block",
+            display: "block", // Changed from inline-block
+            width: "100%",
+            maxWidth: "min(800px, 90vw)", // Responsive max width
+            boxSizing: "border-box",
           }}
         >
           <div
@@ -76,9 +91,10 @@ export default function Footer() {
               backgroundColor: "#d9c48c",      // Inner background
               border: "4px solid white",     // Inner white border
               borderRadius: "8px",
-              padding: "1rem 1rem",
-              maxWidth: "800px",
+              padding: "1rem",
+              width: "100%",
               textAlign: "center",
+              boxSizing: "border-box",
             }}
           >
             <h3
@@ -97,6 +113,7 @@ export default function Footer() {
                 lineHeight: "1.4",
                 marginBottom: "0.5rem",
                 fontSize: "0.9rem",
+                wordWrap: "break-word", // Ensure text wraps properly
               }}
             >
               Your support helps us keep Reformed Chapter running and expand our collection of Christ-centered resources.
@@ -113,6 +130,8 @@ export default function Footer() {
                 cursor: "pointer",
                 fontSize: "0.9rem",
                 transition: "background-color 0.3s",
+                maxWidth: "150px", // Prevent button from being too wide
+                width: "auto",
               }}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#0059b3"}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#004080"}
@@ -123,7 +142,13 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div style={{ fontSize: "0.8rem", color: "#aaa" }}>
+        <div style={{ 
+          fontSize: "0.8rem", 
+          color: "#aaa",
+          width: "100%",
+          boxSizing: "border-box",
+          wordWrap: "break-word"
+        }}>
           © {new Date().getFullYear()} Reformed Chapter. All rights reserved.
         </div>
       </div>
@@ -137,4 +162,5 @@ const linkStyle = {
   fontWeight: "500",
   transition: "color 0.2s",
   cursor: "pointer",
+  whiteSpace: "nowrap", // Prevent individual links from wrapping
 };
