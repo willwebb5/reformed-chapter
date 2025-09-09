@@ -55,7 +55,6 @@ function ChapterPage() {
         chapter={chapter}
         pageType="chapter"
         resourceCount={0} // You can calculate this based on your data
-        canonicalUrl={`https://yourdomain.com/${book}/${chapter}`} // Replace with your actual domain
       />
       
       {isMobile ? <ChapterMobile /> : <ChapterDesktop />}

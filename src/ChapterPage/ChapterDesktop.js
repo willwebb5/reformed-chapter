@@ -171,7 +171,7 @@ function ChapterDesktop() {
   const prevChapter = chapterNum > 1 ? chapterNum - 1 : null;
   const nextChapter = chapterNum < totalChapters ? chapterNum + 1 : null;
 
-  if (!bookName) return <div>Book not found</div>;
+  if (!bookName) return <div style={{ backgroundColor: "#ffffff", color: "#000000" }}>Book not found</div>;
 
   const bubbleStyle = {
     backgroundColor: "#f5f5f5",
@@ -220,7 +220,8 @@ function ChapterDesktop() {
       <div
         style={{
           display: "flex",
-          backgroundColor: "white",
+          backgroundColor: "#ffffff", // Explicitly white
+          color: "#000000", // Explicitly black text
           padding: "1.25rem",
           border: "1px solid #e5e7eb",
           borderRadius: "16px",
@@ -268,7 +269,7 @@ function ChapterDesktop() {
               <h4
                 style={{
                   margin: "0",
-                  color: "#000",
+                  color: "#000000", // Explicitly black
                   fontSize: "1.3rem",
                   fontWeight: "600",
                   lineHeight: "1.3",
@@ -295,7 +296,7 @@ function ChapterDesktop() {
               <p
                 style={{
                   margin: "0",
-                  color: "#666",
+                  color: "#666666", // Explicitly gray
                   fontSize: "0.95rem",
                   fontStyle: "italic",
                   lineHeight: "1.4"
@@ -357,12 +358,12 @@ function ChapterDesktop() {
               justifyContent: "flex-start",
               fontSize: "0.8rem",
               fontStyle: "italic",
-              color: "#666",
+              color: "#666666", // Explicitly gray
               textAlign: "left"
             }}>
               <strong style={{ 
                 fontStyle: "normal", 
-                color: "#374151", 
+                color: "#374151", // Explicitly dark gray
                 fontWeight: "600",
                 marginBottom: "0.3rem",
                 fontSize: "0.75rem",
@@ -390,7 +391,7 @@ function ChapterDesktop() {
       <section
         style={{
           width: "100%",
-          border: "1px solid #ccc",
+          border: "1px solid #cccccc",
           borderRadius: "8px",
           padding: "1rem",
           marginBottom: "1.5rem",
@@ -398,13 +399,13 @@ function ChapterDesktop() {
           flexDirection: "column"
         }}
       >
-        <h2 style={{ marginTop: 0, color: "black" }}>
+        <h2 style={{ marginTop: 0, color: "#000000" }}> {/* Explicitly black */}
           {title} ({totalItems})
         </h2>
         {loading ? (
-          <p style={{ fontStyle: "italic", color: "#666" }}>Loading...</p>
+          <p style={{ fontStyle: "italic", color: "#666666" }}>Loading...</p>
         ) : totalItems === 0 ? (
-          <p style={{ fontStyle: "italic", color: "#666" }}>
+          <p style={{ fontStyle: "italic", color: "#666666" }}>
             No resources available
           </p>
         ) : (
@@ -422,8 +423,33 @@ function ChapterDesktop() {
   };
 
   return (
-    <div style={{ padding: "0rem 2rem 2rem", textAlign: "center" }}>
+    <div style={{ 
+      padding: "0rem 2rem 2rem", 
+      textAlign: "center", 
+      backgroundColor: "#ffffff", // Explicitly white background
+      color: "#000000", // Explicitly black text
+      minHeight: "100vh" // Ensure full page coverage
+    }}>
       <Header />
+      
+      {/* Intro positioned above everything else */}
+      <div style={{ paddingTop: "70px", textAlign: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "36px",
+            maxWidth: "900px",
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          {/* Intro bubble - moved to top */}
+          <Intro />
+        </div>
+      </div>
+      
       {loading && (
         <LoadingScreen 
           selectedBook={bookName} 
@@ -447,8 +473,8 @@ function ChapterDesktop() {
         </div>
       )}
 
-      <div style={{ paddingTop: "35px", textAlign: "center" }}>
-        {/* Wrapper for Intro + selects */}
+      <div style={{ paddingTop: "20px", textAlign: "center" }}>
+        {/* Wrapper for navigation controls */}
         <div
           style={{
             display: "flex",
@@ -460,9 +486,6 @@ function ChapterDesktop() {
             marginRight: "auto",
           }}
         >
-          {/* Intro bubble */}
-          <Intro />
-
           {/* Navigation controls: Book and Chapter selects with Prev/Next buttons */}
           <div
             style={{
@@ -475,7 +498,7 @@ function ChapterDesktop() {
           >
             {/* Book select */}
             <div>
-              <label htmlFor="book-select" style={{ fontWeight: "bold", color:"black" }}>
+              <label htmlFor="book-select" style={{ fontWeight: "bold", color: "#000000" }}> {/* Explicitly black */}
                 Choose a book:
               </label>
               <br />
@@ -494,8 +517,9 @@ function ChapterDesktop() {
                   padding: "0.6rem 1rem",
                   fontSize: "1rem",
                   borderRadius: "12px",
-                  border: "1.5px solid black",
-                  backgroundColor: "white",
+                  border: "1.5px solid #000000", // Explicitly black border
+                  backgroundColor: "#ffffff", // Explicitly white
+                  color: "#000000", // Explicitly black text
                   cursor: "pointer",
                   outline: "none",
                   transition: "all 0.3s ease",
@@ -512,7 +536,7 @@ function ChapterDesktop() {
 
             {/* Chapter select */}
             <div>
-              <label htmlFor="chapter-select" style={{ fontWeight: "bold" }}>
+              <label htmlFor="chapter-select" style={{ fontWeight: "bold", color: "#000000" }}> {/* Explicitly black */}
                 Choose a chapter:
               </label>
               <br />
@@ -531,8 +555,9 @@ function ChapterDesktop() {
                   padding: "0.6rem 1rem",
                   fontSize: "1rem",
                   borderRadius: "12px",
-                  border: "1.5px solid black",
-                  backgroundColor: "white",
+                  border: "1.5px solid #000000", // Explicitly black border
+                  backgroundColor: "#ffffff", // Explicitly white
+                  color: "#000000", // Explicitly black text
                   cursor: "pointer",
                   outline: "none",
                   transition: "all 0.3s ease",
@@ -558,12 +583,12 @@ function ChapterDesktop() {
                     color: "#2563eb", 
                     textDecoration: "none", 
                     padding: "0.6rem 1rem", 
-                    border: "1.5px solid black", 
+                    border: "1.5px solid #000000", // Explicitly black border
                     borderRadius: "12px",
                     fontSize: "1rem",
                     fontWeight: "500",
                     transition: "all 0.3s ease",
-                    backgroundColor: "white",
+                    backgroundColor: "#ffffff", // Explicitly white
                     display: "inline-block",
                     textAlign: "center",
                     minWidth: "70px"
@@ -572,7 +597,7 @@ function ChapterDesktop() {
                     e.target.style.backgroundColor = "#e5e7eb";
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = "white";
+                    e.target.style.backgroundColor = "#ffffff";
                   }}
                 >
                   ← Prev
@@ -586,12 +611,12 @@ function ChapterDesktop() {
                     color: "#2563eb", 
                     textDecoration: "none", 
                     padding: "0.6rem 1rem", 
-                    border: "1.5px solid black", 
+                    border: "1.5px solid #000000", // Explicitly black border
                     borderRadius: "12px",
                     fontSize: "1rem",
                     fontWeight: "500",
                     transition: "all 0.3s ease",
-                    backgroundColor: "white",
+                    backgroundColor: "#ffffff", // Explicitly white
                     display: "inline-block",
                     textAlign: "center",
                     minWidth: "70px"
@@ -600,7 +625,7 @@ function ChapterDesktop() {
                     e.target.style.backgroundColor = "#e5e7eb";
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = "white";
+                    e.target.style.backgroundColor = "#ffffff";
                   }}
                 >
                   Next →
@@ -626,11 +651,11 @@ function ChapterDesktop() {
             }}>
               <h1 style={{ 
                 fontWeight: "700", 
-                color: "black",
+                color: "#000000", // Explicitly black
                 fontSize: "2rem",
                 textAlign: "center",
                 margin: "0",
-                textShadow: "#8e7727",
+                textShadow: "none", // Remove text shadow that might cause issues
               }}>
                 Resources for {bookName} {chapterNum}
               </h1>
