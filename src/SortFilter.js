@@ -18,7 +18,8 @@ const SortFilter = ({
   filters, 
   setFilters, 
   toggleFilter, 
-  availableAuthors = new Set() // Default to empty Set if not provided
+  availableAuthors = new Set(), // Default to empty Set if not provided
+  customStyles = {} // Accept custom styles to override dark mode
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showSortOptions, setShowSortOptions] = useState(false);
@@ -45,7 +46,7 @@ const SortFilter = ({
     [availableAuthors]
   );
 
-  // Memoize filtered authors for better performance
+  // Memoized filtered authors for better performance
   const filteredAuthors = useMemo(() => 
     authorsArray.filter(author =>
       author.toLowerCase().includes(authorSearch.toLowerCase())
@@ -116,13 +117,14 @@ const SortFilter = ({
   const renderArrow = (isExpanded) => (
     <span style={{
       transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-      transition: "0.2s"
+      transition: "0.2s",
+      color: "#000000" // Explicit black
     }}>
       ▼
     </span>
   );
 
-  // Mobile styles
+  // Mobile styles with explicit colors
   const mobileStyles = {
     container: {
       marginBottom: "1.5rem"
@@ -132,7 +134,8 @@ const SortFilter = ({
       padding: "0.75rem 1rem",
       borderRadius: "10px",
       border: "2px solid #e2e8f0",
-      backgroundColor: "white",
+      backgroundColor: "#ffffff", // Explicit white
+      color: "#000000", // Explicit black
       fontSize: "1rem",
       fontWeight: "600",
       display: "flex",
@@ -147,7 +150,8 @@ const SortFilter = ({
       padding: "0.75rem",
       borderRadius: "10px",
       border: "1px solid #e2e8f0",
-      backgroundColor: "#f8fafc",
+      backgroundColor: "#f8fafc", // Explicit light gray
+      color: "#000000", // Explicit black
       boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
     },
     sectionButton: (isExpanded) => ({
@@ -155,7 +159,8 @@ const SortFilter = ({
       padding: "0.6rem 0.8rem",
       borderRadius: "10px",
       border: "1px solid #e2e8f0",
-      backgroundColor: isExpanded ? "#e2e8f0" : "white",
+      backgroundColor: isExpanded ? "#e2e8f0" : "#ffffff", // Explicit white
+      color: "#000000", // Explicit black
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
@@ -174,8 +179,8 @@ const SortFilter = ({
       padding: "0.4rem 0.6rem",
       borderRadius: "16px",
       border: `1px solid ${isSelected ? color : "#e2e8f0"}`,
-      backgroundColor: isSelected ? color : "white",
-      color: isSelected ? "white" : "#64748b",
+      backgroundColor: isSelected ? color : "#ffffff", // Explicit white when not selected
+      color: isSelected ? "#ffffff" : "#000000", // Explicit black when not selected
       fontWeight: "500",
       cursor: "pointer",
       fontSize: "0.8rem",
@@ -186,6 +191,8 @@ const SortFilter = ({
       padding: "0.6rem",
       borderRadius: "10px",
       border: "1px solid #e2e8f0",
+      backgroundColor: "#ffffff", // Explicit white
+      color: "#000000", // Explicit black
       marginBottom: "0.5rem",
       outline: "none",
       boxSizing: "border-box",
@@ -196,14 +203,14 @@ const SortFilter = ({
       borderRadius: "10px",
       border: "none",
       backgroundColor: "#ef4444",
-      color: "white",
+      color: "#ffffff", // Explicit white
       cursor: "pointer",
       fontWeight: "500",
       fontSize: "0.85rem"
     }
   };
 
-  // Desktop styles
+  // Desktop styles with explicit colors
   const desktopStyles = {
     container: {
       marginBottom: "2rem"
@@ -213,7 +220,8 @@ const SortFilter = ({
       padding: "1rem 1.5rem",
       borderRadius: "12px",
       border: "2px solid #e2e8f0",
-      backgroundColor: "white",
+      backgroundColor: "#ffffff", // Explicit white
+      color: "#000000", // Explicit black
       fontSize: "1.1rem",
       fontWeight: "700",
       display: "flex",
@@ -228,7 +236,8 @@ const SortFilter = ({
       padding: "1rem",
       borderRadius: "12px",
       border: "1px solid #e2e8f0",
-      backgroundColor: "#f8fafc",
+      backgroundColor: "#f8fafc", // Explicit light gray
+      color: "#000000", // Explicit black
       boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
     },
     sectionButton: (isExpanded) => ({
@@ -236,7 +245,8 @@ const SortFilter = ({
       padding: "0.75rem 1rem",
       borderRadius: "12px",
       border: "2px solid #e2e8f0",
-      backgroundColor: isExpanded ? "#e2e8f0" : "white",
+      backgroundColor: isExpanded ? "#e2e8f0" : "#ffffff", // Explicit white
+      color: "#000000", // Explicit black
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
@@ -253,8 +263,8 @@ const SortFilter = ({
       padding: "0.5rem 0.8rem",
       borderRadius: "20px",
       border: `2px solid ${isSelected ? color : "#e2e8f0"}`,
-      backgroundColor: isSelected ? color : "white",
-      color: isSelected ? "white" : "#64748b",
+      backgroundColor: isSelected ? color : "#ffffff", // Explicit white when not selected
+      color: isSelected ? "#ffffff" : "#000000", // Explicit black when not selected
       fontWeight: "500",
       cursor: "pointer"
     }),
@@ -263,6 +273,8 @@ const SortFilter = ({
       padding: "0.5rem 0.75rem",
       borderRadius: "12px",
       border: "2px solid #e2e8f0",
+      backgroundColor: "#ffffff", // Explicit white
+      color: "#000000", // Explicit black
       marginBottom: "0.5rem",
       outline: "none",
       boxSizing: "border-box",
@@ -273,7 +285,7 @@ const SortFilter = ({
       borderRadius: "12px",
       border: "none",
       backgroundColor: "#ef4444",
-      color: "white",
+      color: "#ffffff", // Explicit white
       cursor: "pointer",
       fontWeight: "600"
     }
@@ -305,7 +317,7 @@ const SortFilter = ({
               aria-expanded={showSortOptions}
             >
               🔄 Sort Results
-              <span>{showSortOptions ? "▲" : "▼"}</span>
+              <span style={{ color: "#000000" }}>{showSortOptions ? "▲" : "▼"}</span>
             </button>
             
             {showSortOptions && (
@@ -332,7 +344,7 @@ const SortFilter = ({
               aria-expanded={showResourceTypes}
             >
               📚 {isMobile ? "Types" : "Resource Types"}
-              <span>{showResourceTypes ? "▲" : "▼"}</span>
+              <span style={{ color: "#000000" }}>{showResourceTypes ? "▲" : "▼"}</span>
             </button>
             
             {showResourceTypes && (
@@ -370,7 +382,7 @@ const SortFilter = ({
               aria-expanded={showPrice}
             >
               💲 Price
-              <span>{showPrice ? "▲" : "▼"}</span>
+              <span style={{ color: "#000000" }}>{showPrice ? "▲" : "▼"}</span>
             </button>
             
             {showPrice && (
@@ -401,7 +413,7 @@ const SortFilter = ({
               aria-expanded={showAuthors}
             >
               👥 Authors {!isMobile && `(${authorsArray.length} available)`}
-              <span>{showAuthors ? "▲" : "▼"}</span>
+              <span style={{ color: "#000000" }}>{showAuthors ? "▲" : "▼"}</span>
             </button>
             
             {showAuthors && (
@@ -410,7 +422,7 @@ const SortFilter = ({
                   <div style={{ 
                     padding: isMobile ? "0.75rem" : "1rem", 
                     textAlign: "center", 
-                    color: "#666",
+                    color: "#666666", // Explicit gray
                     fontStyle: "italic",
                     fontSize: isMobile ? "0.85rem" : "1rem"
                   }}>
@@ -453,7 +465,7 @@ const SortFilter = ({
                           {filteredAuthors.length === 0 && (
                             <div style={{ 
                               padding: "0.5rem", 
-                              color: "#666", 
+                              color: "#666666", // Explicit gray
                               fontStyle: "italic",
                               fontSize: isMobile ? "0.8rem" : "0.9rem"
                             }}>
@@ -466,7 +478,7 @@ const SortFilter = ({
                       {!authorSearch.trim() && (
                         <div style={{ 
                           padding: "0.5rem", 
-                          color: "#888", 
+                          color: "#888888", // Explicit light gray
                           fontStyle: "italic",
                           fontSize: isMobile ? "0.8rem" : "0.9rem"
                         }}>

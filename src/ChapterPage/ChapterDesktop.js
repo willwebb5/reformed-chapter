@@ -433,7 +433,7 @@ function ChapterDesktop() {
       <Header />
       
       {/* Intro positioned above everything else */}
-      <div style={{ paddingTop: "70px", textAlign: "center" }}>
+      <div style={{ paddingTop: "80px", textAlign: "center" }}>
         <div
           style={{
             display: "flex",
