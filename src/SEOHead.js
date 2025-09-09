@@ -21,7 +21,7 @@ const SEOHead = ({
   relatedTopics = []
 }) => {
   const siteName = "Bible Study Hub";
-  const siteUrl = "https://yourdomain.com"; // Replace with your actual domain
+  const siteUrl = "https://reformedchapter.com"; // Replace with your actual domain
   const defaultDescription = "Discover comprehensive Bible study resources including sermons, commentaries, devotionals, and more to deepen your Scripture understanding.";
   
   // Enhanced title generation with better keyword density
@@ -30,7 +30,7 @@ const SEOHead = ({
     if (bookName && chapter) {
       const resourceText = resourceCount > 0 ? ` | ${resourceCount} Resources` : '';
       const verseText = verseRange ? ` Verses ${verseRange}` : '';
-      return `${bookName} ${chapter}${verseText} Bible Study Commentary${resourceText} | ${siteName}`;
+      return `${bookName} ${chapter}${verseText} Bible Study Resources${resourceText} | ${siteName}`;
     }
     return `${siteName} | Free Bible Study Resources & Commentary`;
   };
