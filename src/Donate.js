@@ -36,7 +36,7 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount: amount,
+          amount: Math.round(amount * 100), // Convert to cents
           currency: 'usd',
           metadata: {
             type: 'donation',
@@ -45,10 +45,39 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
         }),
       });
 
-      const { clientSecret, error: serverError } = await response.json();
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response error:', response.status, errorText);
+        throw new Error(`Server error (${response.status}): ${errorText || 'Unknown error'}`);
+      }
+
+      // Check if response content-type is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text();
+        console.error('Non-JSON response received:', responseText);
+        throw new Error('Server returned non-JSON response. Please check your backend endpoint.');
+      }
+
+      let responseData;
+      try {
+        responseData = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        throw new Error('Invalid JSON response from server. Please check your backend endpoint.');
+      }
+
+      const { client_secret: clientSecret, error: serverError } = responseData;
 
       if (serverError) {
-        throw new Error(serverError.message || 'Server error');
+        throw new Error(serverError.message || 'Server error occurred');
+      }
+
+      // Fixed: Use clientSecret instead of finalClientSecret
+      if (!clientSecret) {
+        console.error('Missing client_secret in response:', responseData);
+        throw new Error('Invalid response from server: missing client_secret');
       }
 
       // Confirm the payment with Stripe
@@ -62,6 +91,7 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
       });
 
       if (error) {
+        console.error('Stripe payment error:', error);
         setMessage(error.message);
         onError?.(error);
       } else if (paymentIntent.status === 'succeeded') {
@@ -69,6 +99,7 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
         onSuccess?.(paymentIntent);
       }
     } catch (err) {
+      console.error('Payment processing error:', err);
       setMessage(err.message || 'An unexpected error occurred.');
       onError?.(err);
     }
@@ -98,7 +129,7 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
         disabled={!stripe || processing}
         className="donate-button"
       >
-        {processing ? 'Processing...' : `Donate ${amount}`}
+        {processing ? 'Processing...' : `Donate $${amount}`}
       </button>
       
       {message && (
@@ -153,6 +184,7 @@ const ReformedChapterDonate = () => {
 
   return (
     <div className="page-container">
+      <Header />
       
       {/* Support Message Bubble */}
       <div className="support-message">
