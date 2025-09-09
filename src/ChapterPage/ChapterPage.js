@@ -58,11 +58,6 @@ function ChapterPage() {
         canonicalUrl={`https://yourdomain.com/${book}/${chapter}`} // Replace with your actual domain
       />
       
-      {/* Temporary debug to verify URL params are working */}
-      <div style={{background: 'lightblue', padding: '10px', margin: '10px', fontSize: '12px'}}>
-        DEBUG: Book="{book}", Chapter="{chapter}", Formatted="{formattedBookName}"
-      </div>
-      
       {isMobile ? <ChapterMobile /> : <ChapterDesktop />}
     </div>
   );
