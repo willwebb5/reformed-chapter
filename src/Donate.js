@@ -31,19 +31,17 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
     try {
       // Create payment intent on your server
       const response = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: Math.round(amount * 100), // Convert to cents
-          currency: 'usd',
-          metadata: {
-            type: 'donation',
-            timestamp: new Date().toISOString(),
-          },
-        }),
-      });
+  method: 'POST', // ✅ must be POST
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    amount: Math.round(amount * 100), // convert $ to cents
+    currency: 'usd',
+    metadata: { type: 'donation' },
+  }),
+});
+
+const data = await response.json();
+console.log(data.client_secret); // use this for Stripe.js
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
