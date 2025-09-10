@@ -183,7 +183,7 @@ export default function AboutUs() {
             </button>
 
             <button
-              onClick={() => (window.location.href = "mailto:you@example.com")}
+              onClick={() => (window.location.href = "mailto:reformedchapter@gmail.com")}
               style={buttonStyle}
               onMouseOver={buttonHover}
               onMouseOut={buttonOut}
