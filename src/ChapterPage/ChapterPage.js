@@ -3,6 +3,38 @@ import { useParams } from 'react-router-dom';
 import ChapterDesktop from './ChapterDesktop';
 import ChapterMobile from './ChapterMobile';
 import SEOHead from '../SEOHead'; // Adjust path as needed
+import { bibleBooks, urlToBook } from '../Constants'; // Adjust path as needed
+
+// 404 Page Component
+function NotFoundPage() {
+  return (
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      minHeight: '100vh',
+      textAlign: 'center',
+      padding: '20px',
+      backgroundColor: '#ffffff',
+      color: '#000000'
+    }}>
+      <h1 style={{ fontSize: '4rem', margin: '0' }}>404</h1>
+      <h2>Page Not Found</h2>
+      <p>The page you're looking for doesn't exist.</p>
+      <a href="/" style={{ 
+        marginTop: '20px', 
+        padding: '10px 20px', 
+        backgroundColor: '#007cba', 
+        color: 'white', 
+        textDecoration: 'none', 
+        borderRadius: '5px' 
+      }}>
+        Go Home
+      </a>
+    </div>
+  );
+}
 
 function ChapterPage() {
   const [isMobile, setIsMobile] = useState(false);
@@ -11,11 +43,7 @@ function ChapterPage() {
   // Get URL parameters
   const { book, chapter } = useParams();
   
-  // Capitalize book name for display
-  const formattedBookName = book ? book.split(' ').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ') : '';
-  
+  // All hooks must be called before any conditional logic
   useEffect(() => {
     const checkDevice = () => {
       const width = window.innerWidth;
@@ -45,6 +73,27 @@ function ChapterPage() {
     window.addEventListener('resize', checkDevice);
     return () => window.removeEventListener('resize', checkDevice);
   }, []);
+
+  // Validate book exists (after hooks)
+  const bookName = urlToBook(book);
+  if (!bookName) {
+    return <NotFoundPage />;
+  }
+  
+  // Find the book info
+  const bookInfo = bibleBooks.find(b => b.name === bookName);
+  if (!bookInfo) {
+    return <NotFoundPage />;
+  }
+  
+  // Validate chapter number
+  const chapterNum = parseInt(chapter);
+  if (isNaN(chapterNum) || chapterNum < 1 || chapterNum > bookInfo.chapters) {
+    return <NotFoundPage />;
+  }
+  
+  // Capitalize book name for display
+  const formattedBookName = bookName;
 
   return (
     <div>
