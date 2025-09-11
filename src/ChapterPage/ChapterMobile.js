@@ -318,7 +318,7 @@ function ChapterMobile() {
       <Header />
       
       {/* Reduced spacing between header and intro */}
-      <div style={{ marginTop: "0.75rem", marginBottom: "1rem" }}>
+      <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
         <Intro />
       </div>
 
