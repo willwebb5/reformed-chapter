@@ -22,17 +22,20 @@ export default async function handler(req, res) {
     try {
       const { amount, currency = 'usd', metadata = {} } = req.body;
 
+      console.log('Creating payment intent for amount:', amount);
+
       // Validate amount (amount must be in cents)
       if (!amount || amount < 50) {
         return res.status(400).json({
-          error: 'Invalid amount',
-          message: 'Amount must be at least $0.50',
+          error: { 
+            message: 'Amount must be at least $0.50' 
+          }
         });
       }
 
       // Create PaymentIntent
       const paymentIntent = await stripe.paymentIntents.create({
-        amount,
+        amount: Math.round(amount), // Ensure it's an integer
         currency,
         metadata: {
           ...metadata,
@@ -41,21 +44,26 @@ export default async function handler(req, res) {
         automatic_payment_methods: { enabled: true },
       });
 
-      // Send JSON response
+      console.log('Payment intent created:', paymentIntent.id);
+
+      // Send JSON response with consistent property names
       return res.status(200).json({
-        clientSecret: paymentIntent.client_secret,
+        client_secret: paymentIntent.client_secret, // Using underscore to match frontend
         paymentIntentId: paymentIntent.id,
       });
     } catch (error) {
       console.error('Error creating payment intent:', error);
       return res.status(500).json({
-        error: 'Failed to create payment intent',
-        message: error.message,
+        error: { 
+          message: error.message || 'Failed to create payment intent' 
+        }
       });
     }
   } else {
     // Method not allowed
     res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ 
+      error: { message: 'Method Not Allowed' } 
+    });
   }
 }
