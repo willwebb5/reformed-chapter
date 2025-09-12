@@ -186,22 +186,26 @@ const ReformedChapterDonate = () => {
       
       {/* Support Message Bubble */}
       <div className="support-message">
-        <h2>Supporting Reformed Chapter</h2>
-        <p>
-          Reformed Chapter is committed to providing free, high-quality biblical resources 
-          to believers around the world. Your generous donation helps us maintain and expand 
-          our collection of Reformed theological works, commentaries, and study materials.
-        </p>
-        <p>
-          Every contribution, no matter the size, enables us to continue serving the church 
-          with faithful biblical scholarship and sound doctrine. Thank you for partnering 
-          with us in this ministry.
-        </p>
-        <div className="verse">
-          <em>"Each of you should give what you have decided in your heart to give, not reluctantly 
-          or under compulsion, for God loves a cheerful giver." - 2 Corinthians 9:7</em>
-        </div>
-      </div>
+  <h2>Support Reformed Chapter</h2>
+  <p>
+    Reformed Chapter is a personal project created to make Reformed biblical 
+    resources more accessible to believers around the world. All of the content 
+    on this site is provided free of charge, and your support helps cover the 
+    costs of hosting, development, and continued growth.
+  </p>
+  <p>
+    If you’ve found this resource valuable, would you prayerfully consider 
+    supporting it? Every gift—large or small—directly helps me continue building 
+    and improving Reformed Chapter for the good of the church.
+  </p>
+  <div className="verse">
+    <em>
+      "Each of you should give what you have decided in your heart to give, not 
+      reluctantly or under compulsion, for God loves a cheerful giver." 
+      – 2 Corinthians 9:7
+    </em>
+  </div>
+</div>
 
       {/* Donation Form */}
       <div className="donate-container">
