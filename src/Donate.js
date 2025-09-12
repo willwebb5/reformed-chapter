@@ -6,7 +6,6 @@ import {
   useStripe,
   useElements
 } from '@stripe/react-stripe-js';
-import Header from './Header/Header';
 
 // Load Stripe outside of component to avoid recreating on every render
 const publishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
@@ -31,7 +30,7 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
     try {
       // Create payment intent on your server
       const response = await fetch('/api/create-payment-intent', {
-        method: 'POST', // ✅ must be POST
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: Math.round(amount * 100), // convert $ to cents
@@ -40,8 +39,8 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
         }),
       });
 
-const data = await response.json();
-console.log(data.client_secret); // use this for Stripe.js
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
 
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
@@ -58,13 +57,9 @@ console.log(data.client_secret); // use this for Stripe.js
         throw new Error('Server returned non-JSON response. Please check your backend endpoint.');
       }
 
-      let responseData;
-      try {
-        responseData = await response.json();
-      } catch (jsonError) {
-        console.error('Failed to parse JSON response:', jsonError);
-        throw new Error('Invalid JSON response from server. Please check your backend endpoint.');
-      }
+      // Parse JSON response (only once!)
+      const responseData = await response.json();
+      console.log('Parsed response data:', responseData);
 
       const { client_secret: clientSecret, error: serverError } = responseData;
 
@@ -72,11 +67,12 @@ console.log(data.client_secret); // use this for Stripe.js
         throw new Error(serverError.message || 'Server error occurred');
       }
 
-      // Fixed: Use clientSecret instead of finalClientSecret
       if (!clientSecret) {
         console.error('Missing client_secret in response:', responseData);
         throw new Error('Invalid response from server: missing client_secret');
       }
+
+      console.log('Confirming payment with client_secret:', clientSecret);
 
       // Confirm the payment with Stripe
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
@@ -109,32 +105,109 @@ console.log(data.client_secret); // use this for Stripe.js
     style: {
       base: {
         fontSize: '16px',
-        color: '#424770',
-        '::placeholder': { color: '#aab7c4' },
+        color: '#111',
+        fontFamily: '"system-ui", sans-serif',
+        '::placeholder': { color: '#666' },
+        padding: '8px 0',
       },
-      invalid: { color: '#dc2626' },
+      invalid: { 
+        color: '#dc2626',
+        iconColor: '#dc2626'
+      },
+      complete: {
+        color: '#004080',
+        iconColor: '#004080'
+      }
     },
   };
 
   return (
-    <div className="donation-form">
-      <div className="card-element-container">
-        <CardElement options={cardElementOptions} />
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <label style={{ color: "#111", fontWeight: 500 }}>
+        Card Information:
+        <div style={{
+          border: "1px solid #ccc",
+          borderRadius: "6px",
+          padding: "0.5rem",
+          marginTop: "0.25rem",
+          backgroundColor: "#fff"
+        }}>
+          <CardElement options={cardElementOptions} />
+        </div>
+      </label>
       
       <button
         onClick={handleSubmit}
         disabled={!stripe || processing}
-        className="donate-button"
+        style={{
+          width: "100%",
+          padding: "0.75rem",
+          backgroundColor: !stripe || processing ? "#ccc" : "#004080",
+          color: "#fff",
+          border: "none",
+          borderRadius: "6px",
+          cursor: !stripe || processing ? "not-allowed" : "pointer",
+          fontWeight: "bold",
+          fontSize: "1rem",
+          transition: "all 0.2s",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.5rem"
+        }}
+        onMouseOver={(e) => {
+          if (stripe && !processing) {
+            e.currentTarget.style.backgroundColor = "#0059b3";
+          }
+        }}
+        onMouseOut={(e) => {
+          if (stripe && !processing) {
+            e.currentTarget.style.backgroundColor = "#004080";
+          }
+        }}
       >
-        {processing ? 'Processing...' : `Donate $${amount}`}
+        {processing ? (
+          <>
+            <div style={{
+              width: "16px",
+              height: "16px",
+              border: "2px solid #fff",
+              borderTop: "2px solid transparent",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite"
+            }}></div>
+            Processing...
+          </>
+        ) : (
+          `Donate $${amount}`
+        )}
       </button>
       
       {message && (
-        <div className={`message ${message.includes('Thank you') ? 'success' : 'error'}`}>
-          {message}
+        <div style={{
+          padding: "0.75rem",
+          borderRadius: "6px",
+          border: "1px solid",
+          borderColor: message.includes('Thank you') ? "#22c55e" : "#dc2626",
+          backgroundColor: message.includes('Thank you') ? "#f0fdf4" : "#fef2f2",
+          color: message.includes('Thank you') ? "#15803d" : "#dc2626",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "0.5rem"
+        }}>
+          <div style={{ flexShrink: 0, marginTop: "2px" }}>
+            {message.includes('Thank you') ? "✓" : "⚠"}
+          </div>
+          <div style={{ fontSize: "0.9rem" }}>{message}</div>
         </div>
       )}
+      
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
@@ -149,11 +222,38 @@ const ReformedChapterDonate = () => {
   // Show error if Stripe key is missing
   if (!publishableKey) {
     return (
-      <div className="error-container">
-        <h2>⚠️ Stripe Configuration Missing</h2>
-        <p>Please check your <code>.env.local</code> file and make sure you have:</p>
-        <pre>REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here</pre>
-        <p>Then restart your server with <code>npm run dev</code></p>
+      <div style={{ padding: "2rem 1rem 1rem", textAlign: "center", backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+        <div style={{
+          maxWidth: "600px",
+          margin: "0 auto",
+          backgroundColor: "#fff3cd",
+          border: "1px solid #ffeaa7",
+          borderRadius: "10px",
+          padding: "1.5rem",
+          textAlign: "center"
+        }}>
+          <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>⚠️</div>
+          <h2 style={{ color: "#856404", marginBottom: "1rem" }}>Stripe Configuration Missing</h2>
+          <div style={{ color: "#856404", textAlign: "left" }}>
+            <p style={{ marginBottom: "1rem" }}>
+              Please check your <code style={{ backgroundColor: "#f8f9fa", padding: "2px 4px", borderRadius: "3px" }}>.env.local</code> file and make sure you have:
+            </p>
+            <pre style={{ 
+              backgroundColor: "#f8f9fa", 
+              padding: "1rem", 
+              borderRadius: "6px", 
+              textAlign: "left",
+              fontSize: "0.9rem",
+              border: "1px solid #e9ecef",
+              overflowX: "auto"
+            }}>
+REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_your_key_here
+            </pre>
+            <p style={{ marginTop: "1rem" }}>
+              Then restart your server with <code style={{ backgroundColor: "#f8f9fa", padding: "2px 4px", borderRadius: "3px" }}>npm run dev</code>
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -180,77 +280,166 @@ const ReformedChapterDonate = () => {
     console.error('Payment error:', error);
   };
 
+  const inputStyle = {
+    width: "100%",
+    padding: "0.5rem",
+    marginTop: "0.25rem",
+    border: "1px solid #ccc",
+    borderRadius: "6px",
+    fontSize: "1rem",
+    outline: "none",
+    color: "#111",
+    backgroundColor: "#fff",
+  };
+
   return (
-    <div className="page-container">
-      <Header />
-      
-      {/* Support Message Bubble */}
-      <div className="support-message">
-  <h2>Support Reformed Chapter</h2>
-  <p>
-    Reformed Chapter is a personal project created to make Reformed biblical 
-    resources more accessible to believers around the world. All of the content 
-    on this site is provided free of charge, and your support helps cover the 
-    costs of hosting, development, and continued growth.
-  </p>
-  <p>
-    If you’ve found this resource valuable, would you prayerfully consider 
-    supporting it? Every gift—large or small—directly helps me continue building 
-    and improving Reformed Chapter for the good of the church.
-  </p>
-  <div className="verse">
-    <em>
-      "Each of you should give what you have decided in your heart to give, not 
-      reluctantly or under compulsion, for God loves a cheerful giver." 
-      – 2 Corinthians 9:7
-    </em>
-  </div>
-</div>
+    <div style={{ padding: "4rem 2rem 2rem", textAlign: "center", backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+      {/* Support Message */}
+      <div style={{
+        maxWidth: "800px",
+        margin: "0 auto 2rem",
+        backgroundColor: "#fff",
+        padding: "2rem",
+        borderRadius: "10px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        textAlign: "left"
+      }}>
+        <h2 style={{ color: "#000", marginBottom: "1.5rem", textAlign: "center" }}>
+          Support Reformed Chapter
+        </h2>
+        
+        <div style={{ lineHeight: "1.6", color: "#111" }}>
+          <p style={{ marginBottom: "1rem" }}>
+            Reformed Chapter is a personal project created to make Reformed biblical 
+            resources more accessible to believers around the world. All of the content 
+            on this site is provided free of charge, and your support helps cover the 
+            costs of hosting, development, and continued growth.
+          </p>
+          <p style={{ marginBottom: "1.5rem" }}>
+            If you've found this resource valuable, would you prayerfully consider 
+            supporting it? Every gift—large or small—directly helps me continue building 
+            and improving Reformed Chapter for the good of the church.
+          </p>
+          
+          <div style={{
+            backgroundColor: "#f0f8ff",
+            border: "1px solid #b3d9ff",
+            borderRadius: "6px",
+            padding: "1rem",
+            fontStyle: "italic",
+            color: "#004080"
+          }}>
+            "Each of you should give what you have decided in your heart to give, not 
+            reluctantly or under compulsion, for God loves a cheerful giver."
+            <div style={{ fontWeight: "bold", marginTop: "0.5rem" }}>– 2 Corinthians 9:7</div>
+          </div>
+        </div>
+      </div>
 
       {/* Donation Form */}
-      <div className="donate-container">
-        <h3>Make a Donation</h3>
+      <div style={{
+        maxWidth: "800px",
+        margin: "0 auto",
+        backgroundColor: "#fff",
+        padding: "2rem",
+        borderRadius: "10px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+      }}>
+        <h3 style={{ color: "#000", marginBottom: "2rem" }}>
+          Make a Donation
+        </h3>
         
         {!showForm ? (
-          <div className="amount-selection">
-            <div className="preset-amounts">
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", textAlign: "left" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "1rem" }}>
               {presetAmounts.map((presetAmount) => (
                 <button
                   key={presetAmount}
                   onClick={() => handleAmountSelect(presetAmount)}
-                  className={`amount-button ${amount === presetAmount ? 'selected' : ''}`}
+                  style={{
+                    padding: "1rem",
+                    fontSize: "1rem",
+                    fontWeight: "bold",
+                    border: "2px solid",
+                    borderColor: amount === presetAmount ? "#004080" : "#ccc",
+                    borderRadius: "6px",
+                    backgroundColor: amount === presetAmount ? "#004080" : "#fff",
+                    color: amount === presetAmount ? "#fff" : "#111",
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                  onMouseOver={(e) => {
+                    if (amount !== presetAmount) {
+                      e.currentTarget.style.borderColor = "#004080";
+                      e.currentTarget.style.backgroundColor = "#f0f8ff";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (amount !== presetAmount) {
+                      e.currentTarget.style.borderColor = "#ccc";
+                      e.currentTarget.style.backgroundColor = "#fff";
+                    }
+                  }}
                 >
                   ${presetAmount}
                 </button>
               ))}
             </div>
             
-            <div className="custom-amount">
-              <label htmlFor="custom-amount">Other Amount:</label>
+            <label style={{ color: "#111", fontWeight: 500 }}>
+              Other Amount:
               <input
-                id="custom-amount"
                 type="number"
                 min="1"
                 step="0.01"
                 placeholder="Enter amount"
                 value={customAmount}
                 onChange={handleCustomAmountChange}
+                style={inputStyle}
               />
-            </div>
+            </label>
             
             <button
               onClick={() => setShowForm(true)}
               disabled={!amount || amount <= 0}
-              className="proceed-button"
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                backgroundColor: !amount || amount <= 0 ? "#ccc" : "#004080",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                cursor: !amount || amount <= 0 ? "not-allowed" : "pointer",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                transition: "all 0.2s"
+              }}
+              onMouseOver={(e) => {
+                if (amount && amount >= 1) {
+                  e.currentTarget.style.backgroundColor = "#0059b3";
+                }
+              }}
+              onMouseOut={(e) => {
+                if (amount && amount >= 1) {
+                  e.currentTarget.style.backgroundColor = "#004080";
+                }
+              }}
             >
               Continue with ${amount}
             </button>
           </div>
         ) : (
-          <div className="payment-form">
-            <div className="donation-summary">
-              <h4>Donation Amount: ${amount}</h4>
-              <p>Thank you for supporting Reformed Chapter</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", textAlign: "left" }}>
+            <div style={{
+              backgroundColor: "#f0f8ff",
+              border: "1px solid #b3d9ff",
+              borderRadius: "6px",
+              padding: "1rem"
+            }}>
+              <h4 style={{ color: "#004080", margin: "0 0 0.5rem 0", fontWeight: "bold" }}>
+                Donation Amount: ${amount}
+              </h4>
+              <p style={{ color: "#111", margin: 0 }}>Thank you for supporting Reformed Chapter</p>
             </div>
             
             <Elements stripe={stripePromise}>
@@ -263,344 +452,31 @@ const ReformedChapterDonate = () => {
             
             <button
               onClick={() => setShowForm(false)}
-              className="back-button"
+              style={{
+                width: "100%",
+                padding: "0.75rem",
+                backgroundColor: "transparent",
+                color: "#004080",
+                border: "1px solid #004080",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: "500",
+                fontSize: "1rem",
+                transition: "all 0.2s"
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = "#f0f8ff";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
             >
               ← Change Amount
             </button>
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .page-container {
-          max-width: 700px;
-          margin: 0 auto;
-          padding: 20px;
-          padding-top: 100px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          line-height: 1.6;
-          color: #333;
-        }
-
-        .support-message {
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 30px;
-          margin-bottom: 30px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .support-message h2 {
-          color: #2d3748;
-          margin-top: 0;
-          margin-bottom: 20px;
-          font-size: 1.5em;
-          font-weight: 600;
-        }
-
-        .support-message p {
-          margin-bottom: 15px;
-          color: #4a5568;
-        }
-
-        .verse {
-          background: #edf2f7;
-          border-left: 4px solid #4a5568;
-          padding: 15px 20px;
-          margin-top: 20px;
-          border-radius: 0 8px 8px 0;
-          color: #2d3748;
-          font-size: 0.95em;
-        }
-
-        .donate-container {
-          background: white;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 30px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .donate-container h3 {
-          text-align: center;
-          margin-bottom: 25px;
-          color: #2d3748;
-          font-size: 1.3em;
-          font-weight: 600;
-        }
-
-        .amount-selection {
-          text-align: center;
-        }
-
-        .preset-amounts {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-          gap: 12px;
-          margin-bottom: 25px;
-        }
-
-        .amount-button {
-          padding: 12px 16px;
-          border: 2px solid #e2e8f0;
-          background: white;
-          color: #4a5568;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 16px;
-          font-weight: 500;
-          transition: all 0.2s;
-        }
-
-        .amount-button:hover {
-          border-color: #cbd5e0;
-          background: #f7fafc;
-        }
-
-        .amount-button.selected {
-          background: #4a5568;
-          color: white;
-          border-color: #4a5568;
-        }
-
-        .custom-amount {
-          margin-bottom: 25px;
-        }
-
-        .custom-amount label {
-          display: block;
-          margin-bottom: 8px;
-          font-weight: 500;
-          color: #4a5568;
-        }
-
-        .custom-amount input {
-          padding: 12px 16px;
-          border: 2px solid #e2e8f0;
-          border-radius: 8px;
-          font-size: 16px;
-          width: 200px;
-          max-width: 100%;
-          box-sizing: border-box;
-          text-align: center;
-          transition: border-color 0.2s;
-        }
-
-        .custom-amount input:focus {
-          outline: none;
-          border-color: #4a5568;
-        }
-
-        .proceed-button {
-          background: #4a5568;
-          color: white;
-          border: none;
-          padding: 14px 28px;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background-color 0.2s;
-        }
-
-        .proceed-button:hover:not(:disabled) {
-          background: #2d3748;
-        }
-
-        .proceed-button:disabled {
-          background: #cbd5e0;
-          cursor: not-allowed;
-        }
-
-        .payment-form {
-          text-align: center;
-        }
-
-        .donation-summary {
-          background: #f7fafc;
-          padding: 20px;
-          border-radius: 8px;
-          margin-bottom: 25px;
-        }
-
-        .donation-summary h4 {
-          margin-bottom: 8px;
-          color: #2d3748;
-          font-size: 1.2em;
-        }
-
-        .donation-summary p {
-          color: #4a5568;
-          margin: 0;
-        }
-
-        .donation-form {
-          max-width: 400px;
-          margin: 0 auto;
-        }
-
-        .card-element-container {
-          padding: 16px;
-          border: 2px solid #e2e8f0;
-          border-radius: 8px;
-          margin-bottom: 20px;
-          background: white;
-          transition: border-color 0.2s;
-        }
-
-        .card-element-container:focus-within {
-          border-color: #4a5568;
-        }
-
-        .donate-button {
-          width: 100%;
-          padding: 16px;
-          background: #4a5568;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background-color 0.2s;
-        }
-
-        .donate-button:hover:not(:disabled) {
-          background: #2d3748;
-        }
-
-        .donate-button:disabled {
-          background: #cbd5e0;
-          cursor: not-allowed;
-        }
-
-        .back-button {
-          background: transparent;
-          color: #4a5568;
-          border: 2px solid #e2e8f0;
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-size: 14px;
-          cursor: pointer;
-          margin-top: 15px;
-          transition: all 0.2s;
-        }
-
-        .back-button:hover {
-          border-color: #cbd5e0;
-          background: #f7fafc;
-        }
-
-        .message {
-          margin-top: 15px;
-          padding: 12px 16px;
-          border-radius: 8px;
-          font-weight: 500;
-        }
-
-        .message.success {
-          background: #f0fff4;
-          color: #38a169;
-          border: 1px solid #c6f6d5;
-        }
-
-        .message.error {
-          background: #fed7d7;
-          color: #e53e3e;
-          border: 1px solid #feb2b2;
-        }
-
-        .error-container {
-          max-width: 500px;
-          margin: 50px auto;
-          padding: 20px;
-          background: #fed7d7;
-          border: 1px solid #feb2b2;
-          border-radius: 8px;
-          text-align: center;
-        }
-
-        .error-container pre {
-          background: #f7fafc;
-          padding: 10px;
-          text-align: left;
-          border-radius: 4px;
-          font-size: 14px;
-        }
-
-        @media (max-width: 640px) {
-          .page-container {
-            padding: 15px;
-            padding-top: 80px;
-          }
-
-          .support-message {
-            padding: 20px;
-            margin-bottom: 20px;
-          }
-
-          .support-message h2 {
-            font-size: 1.3em;
-          }
-
-          .support-message p {
-            font-size: 0.95em;
-          }
-
-          .verse {
-            padding: 12px 15px;
-            font-size: 0.9em;
-          }
-
-          .donate-container {
-            padding: 20px;
-          }
-
-          .donate-container h3 {
-            font-size: 1.2em;
-          }
-
-          .preset-amounts {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-          }
-
-          .amount-button {
-            padding: 14px 12px;
-            font-size: 15px;
-          }
-
-          .custom-amount input {
-            width: calc(100% - 4px);
-            max-width: none;
-          }
-
-          .proceed-button {
-            width: 100%;
-            padding: 16px;
-          }
-
-          .donation-form {
-            max-width: none;
-          }
-
-          .back-button {
-            width: 100%;
-            margin-top: 20px;
-          }
-
-          .donation-summary {
-            padding: 15px;
-          }
-
-          .donation-summary h4 {
-            font-size: 1.1em;
-          }
-        }
-      `}</style>
     </div>
-    
   );
 };
 
