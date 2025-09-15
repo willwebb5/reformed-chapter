@@ -33,14 +33,12 @@ function ChapterMobile() {
     sermons: [],
     commentaries: [],
     devotionals: [],
-    books: [],
     videos: [],
   });
   const [secondaryResources, setSecondaryResources] = useState({
     sermons: [],
     commentaries: [],
     devotionals: [],
-    books: [],
     videos: [],
   });
 

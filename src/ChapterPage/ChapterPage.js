@@ -38,7 +38,6 @@ function NotFoundPage() {
 
 function ChapterPage() {
   const [isMobile, setIsMobile] = useState(false);
-  const [debugInfo, setDebugInfo] = useState({});
   
   // Get URL parameters
   const { book, chapter } = useParams();
@@ -59,14 +58,6 @@ function ChapterPage() {
       const shouldUseMobile = width <= 768;
       
       setIsMobile(shouldUseMobile);
-      setDebugInfo({
-        width,
-        height,
-        isTouchDevice,
-        mobileUserAgent,
-        shouldUseMobile,
-        userAgent: userAgent.substr(0, 50) + '...'
-      });
     };
 
     checkDevice();

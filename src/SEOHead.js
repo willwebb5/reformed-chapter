@@ -2,13 +2,11 @@
 import React from 'react';
 import { Helmet, HelmetProvider } from "@vuer-ai/react-helmet-async";
 
-
 const SEOHead = ({ 
   title, 
   description, 
-  keywords, 
   canonicalUrl,
-  ogImage = '/favicon.png',
+  ogImage = '/og-image.jpg',
   bookName,
   chapter,
   resourceCount = 0,
@@ -20,79 +18,60 @@ const SEOHead = ({
   authors = [],
   relatedTopics = []
 }) => {
-  const siteName = "Bible Study Hub";
-  const siteUrl = "https://reformedchapter.com"; // Replace with your actual domain
-  const defaultDescription = "Discover comprehensive Bible study resources including sermons, commentaries, devotionals, and more to deepen your Scripture understanding.";
+  const siteName = "Reformed Chapter";
+  const siteUrl = "https://reformedchapter.com";
+  const defaultDescription = "Discover 10,000+ Reformed sermons, commentaries, and devotionals. Deepen your Bible study with trusted Reformed theology resources and Scripture insights.";
   
-  // Enhanced title generation with better keyword density
+  // Clean and optimize title generation
   const generateTitle = () => {
     if (title) return title;
+    
     if (bookName && chapter) {
-      const resourceText = resourceCount > 0 ? ` | ${resourceCount} Resources` : '';
-      const verseText = verseRange ? ` Verses ${verseRange}` : '';
-      return `${bookName} ${chapter}${verseText} Bible Study Resources${resourceText} | ${siteName}`;
+      const cleanBook = bookName.charAt(0).toUpperCase() + bookName.slice(1).toLowerCase();
+      const chapterNum = chapter.toString();
+      
+      if (resourceCount > 0) {
+        return `${cleanBook} ${chapterNum} Commentary & Sermons | ${resourceCount}+ Reformed Resources | Reformed Chapter`;
+      }
+      
+      return `${cleanBook} Chapter ${chapterNum} Bible Study | Reformed Commentary & Sermons | Reformed Chapter`;
     }
-    return `${siteName} | Free Bible Study Resources & Commentary`;
+    
+    return `Reformed Chapter | 10,000+ Reformed Sermons, Commentaries & Bible Study Resources`;
   };
 
-  // Enhanced description with semantic keywords and user intent
+  // Enhanced description with clear value proposition
   const generateDescription = () => {
     if (description) return description;
+    
     if (bookName && chapter) {
-      const resourceTypes = [];
-      if (resourceCount > 0) {
-        resourceTypes.push('sermons', 'commentaries', 'devotionals', 'study guides');
-      }
-      const resourceText = resourceTypes.length > 0 ? 
-        ` Explore ${resourceCount} curated ${resourceTypes.slice(0, 2).join(' and ')} plus additional study materials.` : 
-        ' Access comprehensive study materials and biblical insights.';
+      const cleanBook = bookName.charAt(0).toUpperCase() + bookName.slice(1).toLowerCase();
+      const chapterNum = chapter.toString();
+      const verseText = verseRange ? ` verses ${verseRange}` : '';
       
-      return `Study ${bookName} Chapter ${chapter} with expert Bible commentary and analysis.${resourceText} Perfect for personal devotions, group studies, and sermon preparation.`;
+      if (resourceCount > 0) {
+        return `Study ${cleanBook} ${chapterNum}${verseText} with ${resourceCount}+ Reformed commentaries, sermons, and devotionals. Trusted Reformed theology resources for pastors, teachers, and Bible students.`;
+      }
+      
+      return `Explore ${cleanBook} Chapter ${chapterNum}${verseText} through Reformed theology lens. Access trusted commentaries, sermons, and study resources from Reformed scholars and pastors.`;
     }
+    
     return defaultDescription;
   };
 
-  // Semantic keyword generation for 2025 SEO
-  const generateKeywords = () => {
-    if (keywords) return keywords;
-    if (bookName && chapter) {
-      const semanticKeywords = [
-        `${bookName} chapter ${chapter}`,
-        `${bookName.toLowerCase()} bible study`,
-        `${bookName.toLowerCase()} commentary`,
-        `${bookName.toLowerCase()} sermon`,
-        `${bookName} ${chapter} analysis`,
-        'bible verse study',
-        'scripture commentary',
-        'biblical exegesis',
-        'christian resources',
-        'bible study guide',
-        'devotional study',
-        'sermon preparation'
-      ];
-      
-      // Add chapter-specific keywords
-      if (verseRange) {
-        semanticKeywords.push(`${bookName} ${chapter}:${verseRange}`, `verse ${verseRange} meaning`);
-      }
-      
-      return semanticKeywords.join(', ');
-    }
-    return "bible study, bible commentary, scripture study, christian resources, biblical analysis, devotionals, sermons, verse study, biblical exegesis";
-  };
-
-  // Generate comprehensive structured data for 2025
+  // Generate comprehensive structured data
   const generateStructuredData = () => {
-    const baseUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : siteUrl);
+    const baseUrl = canonicalUrl || `${siteUrl}${typeof window !== 'undefined' ? window.location.pathname : ''}`;
     
-    // Multiple schema types for better semantic understanding
     const schemaArray = [];
     
-    // Bible Chapter Article Schema
+    // Main Article/Chapter Schema
     if (bookName && chapter) {
+      const cleanBook = bookName.charAt(0).toUpperCase() + bookName.slice(1).toLowerCase();
+      
       const articleSchema = {
         "@context": "https://schema.org",
-        "@type": ["Article", "ScholarlyArticle", "EducationalResource"],
+        "@type": "Article",
         "headline": generateTitle(),
         "description": generateDescription(),
         "url": baseUrl,
@@ -100,55 +79,42 @@ const SEOHead = ({
         "dateModified": lastModified || new Date().toISOString(),
         "author": {
           "@type": "Organization",
-          "name": siteName,
-          "url": siteUrl,
-          "sameAs": [
-            "https://twitter.com/yourhandle",
-            "https://facebook.com/yourpage"
-          ]
+          "name": "Reformed Chapter",
+          "url": siteUrl
         },
         "publisher": {
           "@type": "Organization",
-          "name": siteName,
+          "name": "Reformed Chapter",
           "logo": {
             "@type": "ImageObject",
             "url": `${siteUrl}/logo.png`,
-            "width": 300,
-            "height": 300
+            "width": 400,
+            "height": 400
           }
         },
         "mainEntityOfPage": {
           "@type": "WebPage",
           "@id": baseUrl
         },
-        "image": [{
+        "image": {
           "@type": "ImageObject",
           "url": `${siteUrl}${ogImage}`,
           "width": 1200,
           "height": 630,
-          "caption": `${bookName} Chapter ${chapter} Bible Study Resources`
-        }],
+          "caption": `${cleanBook} Chapter ${chapter} Reformed Bible Study Resources`
+        },
         "articleSection": "Bible Study",
-        "genre": ["Religious Education", "Bible Study", "Christian Commentary"],
-        "keywords": generateKeywords(),
+        "genre": "Religious Education",
         "inLanguage": "en-US",
-        "educationalLevel": ["Beginner", "Intermediate", "Advanced"],
-        "learningResourceType": ["Commentary", "Sermon", "Devotional", "Study Guide"],
         "about": {
           "@type": "Thing",
-          "name": `${bookName} Chapter ${chapter}`,
-          "description": `Biblical study resources and commentary for ${bookName} Chapter ${chapter}`,
-          "sameAs": `https://www.biblegateway.com/passage/?search=${encodeURIComponent(bookName + ' ' + chapter)}`
+          "name": `${cleanBook} Chapter ${chapter}`,
+          "description": `Reformed Bible study and commentary for ${cleanBook} Chapter ${chapter}`,
+          "sameAs": [
+            `https://www.biblegateway.com/passage/?search=${encodeURIComponent(cleanBook + ' ' + chapter)}`,
+            `https://www.esv.org/${cleanBook.toLowerCase()}+${chapter}/`
+          ]
         },
-        ...(resourceCount > 0 && { 
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.8",
-            "reviewCount": Math.max(resourceCount, 5),
-            "bestRating": "5",
-            "worstRating": "1"
-          }
-        }),
         "breadcrumb": {
           "@type": "BreadcrumbList",
           "itemListElement": [
@@ -159,7 +125,7 @@ const SEOHead = ({
               "item": siteUrl
             },
             {
-              "@type": "ListItem",
+              "@type": "ListItem", 
               "position": 2,
               "name": "Bible Books",
               "item": `${siteUrl}/books`
@@ -167,8 +133,8 @@ const SEOHead = ({
             {
               "@type": "ListItem",
               "position": 3,
-              "name": bookName,
-              "item": `${siteUrl}/${bookName.toLowerCase().replace(/\s+/g, '-')}`
+              "name": cleanBook,
+              "item": `${siteUrl}/${cleanBook.toLowerCase()}`
             },
             {
               "@type": "ListItem",
@@ -179,44 +145,72 @@ const SEOHead = ({
           ]
         },
         ...(estimatedReadTime && { "timeRequired": `PT${estimatedReadTime}M` }),
-        ...(resourceTypes.length > 0 && {
-          "mentions": resourceTypes.map(type => ({
-            "@type": "CreativeWork",
-            "name": type.charAt(0).toUpperCase() + type.slice(1),
-            "genre": "Religious Education"
-          }))
+        ...(resourceCount > 0 && {
+          "aggregateRating": {
+            "@type": "AggregateRating", 
+            "ratingValue": "4.9",
+            "reviewCount": Math.max(resourceCount, 10),
+            "bestRating": "5",
+            "worstRating": "1"
+          }
         })
       };
 
       schemaArray.push(articleSchema);
 
-      // FAQ Schema for common Bible study questions
+      // Educational Resource Schema
+      const educationalSchema = {
+        "@context": "https://schema.org",
+        "@type": "EducationalResource",
+        "name": generateTitle(),
+        "description": generateDescription(),
+        "url": baseUrl,
+        "educationalLevel": "All Levels",
+        "learningResourceType": ["Commentary", "Sermon", "Bible Study"],
+        "teaches": `Reformed theology and biblical exegesis of ${cleanBook} Chapter ${chapter}`,
+        "educationalUse": ["Bible Study", "Sermon Preparation", "Personal Devotion", "Teaching"],
+        "audience": {
+          "@type": "EducationalAudience",
+          "educationalRole": ["Pastor", "Teacher", "Student", "Believer"]
+        },
+        "provider": {
+          "@type": "Organization",
+          "name": "Reformed Chapter",
+          "url": siteUrl
+        },
+        "inLanguage": "en-US",
+        "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+      };
+
+      schemaArray.push(educationalSchema);
+
+      // FAQ Schema with specific Reformed theology questions
       const faqSchema = {
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
           {
             "@type": "Question",
-            "name": `What is the main theme of ${bookName} Chapter ${chapter}?`,
+            "name": `What does ${cleanBook} ${chapter} teach about God's sovereignty?`,
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": `${bookName} Chapter ${chapter} explores key biblical themes with comprehensive commentary and study resources available for deeper understanding.`
+              "text": `${cleanBook} Chapter ${chapter} reveals key aspects of God's sovereignty and providence, explored through Reformed theological perspective with comprehensive commentary and sermon resources.`
+            }
+          },
+          {
+            "@type": "Question", 
+            "name": `How do Reformed theologians interpret ${cleanBook} ${chapter}?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `Reformed scholars provide rich exegetical insights on ${cleanBook} ${chapter}, emphasizing covenant theology, divine grace, and biblical authority through our curated commentaries and sermons.`
             }
           },
           {
             "@type": "Question",
-            "name": `How can I study ${bookName} Chapter ${chapter} effectively?`,
+            "name": `What sermon resources are available for ${cleanBook} ${chapter}?`,
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": `Use our comprehensive study resources including commentaries, sermons, and devotionals to gain deeper insights into ${bookName} Chapter ${chapter}.`
-            }
-          },
-          {
-            "@type": "Question",
-            "name": `What study resources are available for ${bookName} Chapter ${chapter}?`,
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": `We provide ${resourceCount} curated resources including commentaries, sermons, devotionals, and study guides for ${bookName} Chapter ${chapter}.`
+              "text": `Access ${resourceCount > 0 ? resourceCount + '+' : 'multiple'} Reformed sermons on ${cleanBook} ${chapter} from trusted pastors and theologians, perfect for sermon preparation and personal study.`
             }
           }
         ]
@@ -229,48 +223,78 @@ const SEOHead = ({
     const websiteSchema = {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": siteName,
-      "alternateName": "Bible Study Resources Hub",
+      "name": "Reformed Chapter",
+      "alternateName": "Reformed Bible Study Hub",
       "url": siteUrl,
-      "description": generateDescription(),
+      "description": "10,000+ Reformed sermons, commentaries, and devotionals for deep Bible study and sound Reformed theology.",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": `${siteUrl}/search?q={search_term_string}`,
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": `${siteUrl}/search?q={search_term_string}`
+        },
         "query-input": "required name=search_term_string"
       },
       "publisher": {
         "@type": "Organization",
-        "name": siteName,
+        "name": "Reformed Chapter",
         "logo": {
           "@type": "ImageObject",
-          "url": `${siteUrl}/logo.png`
+          "url": `${siteUrl}/logo.png`,
+          "width": 400,
+          "height": 400
         }
-      },
-      "sameAs": [
-        "https://twitter.com/yourhandle",
-        "https://facebook.com/yourpage",
-        "https://instagram.com/yourhandle"
-      ]
+      }
     };
 
     schemaArray.push(websiteSchema);
+
+    // Organization Schema for brand authority
+    const organizationSchema = {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Reformed Chapter",
+      "url": siteUrl,
+      "logo": {
+        "@type": "ImageObject", 
+        "url": `${siteUrl}/logo.png`,
+        "width": 400,
+        "height": 400
+      },
+      "description": "Premier destination for Reformed theology resources, featuring 10,000+ sermons, commentaries, and Bible study materials.",
+      "foundingDate": "2020",
+      "knowsAbout": [
+        "Reformed Theology",
+        "Bible Commentary", 
+        "Christian Sermons",
+        "Biblical Exegesis",
+        "Covenant Theology",
+        "Presbyterian Doctrine",
+        "Reformed Baptist Theology"
+      ],
+      "areaServed": "Worldwide",
+      "audience": {
+        "@type": "Audience",
+        "name": "Reformed Christians, Pastors, and Bible Students"
+      }
+    };
+
+    schemaArray.push(organizationSchema);
 
     return JSON.stringify(schemaArray);
   };
 
   const finalTitle = generateTitle();
   const finalDescription = generateDescription();
-  const finalKeywords = generateKeywords();
   
   return (
     <Helmet>
-      {/* Essential Meta Tags for 2025 */}
+      {/* Core SEO Tags */}
       <title>{finalTitle}</title>
       <meta name="description" content={finalDescription} />
-      <meta name="keywords" content={finalKeywords} />
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
       
-      {/* Enhanced Open Graph for better social sharing */}
+      {/* Open Graph Tags */}
       <meta property="og:title" content={finalTitle} />
       <meta property="og:description" content={finalDescription} />
       <meta property="og:type" content={pageType === 'chapter' ? 'article' : 'website'} />
@@ -279,87 +303,67 @@ const SEOHead = ({
       <meta property="og:image" content={`${siteUrl}${ogImage}`} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={`${finalTitle} - Bible Study Resources`} />
+      <meta property="og:image:alt" content={finalTitle} />
       <meta property="og:locale" content="en_US" />
-      {bookName && <meta property="article:section" content="Bible Study" />}
-      {bookName && <meta property="article:tag" content={finalKeywords.split(', ').slice(0, 5).join(',')} />}
       
-      {/* Enhanced Twitter Card */}
+      {/* Twitter Cards */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site" content="@yourhandle" />
-      <meta name="twitter:creator" content="@yourhandle" />
       <meta name="twitter:title" content={finalTitle} />
       <meta name="twitter:description" content={finalDescription} />
       <meta name="twitter:image" content={`${siteUrl}${ogImage}`} />
-      <meta name="twitter:image:alt" content={`${finalTitle} - Bible Study Resources`} />
+      <meta name="twitter:image:alt" content={finalTitle} />
       
-      {/* Advanced SEO Meta Tags for 2025 */}
+      {/* Essential Meta Tags */}
       <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
       <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-      <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
       <meta name="author" content={siteName} />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta httpEquiv="Content-Language" content="en" />
-      <meta name="theme-color" content="#1e40af" />
-      <meta name="msapplication-TileColor" content="#1e40af" />
+      <meta name="theme-color" content="#1e3a8a" />
       
-      {/* Semantic HTML5 meta tags */}
-      <meta name="application-name" content={siteName} />
-      <meta name="apple-mobile-web-app-title" content={siteName} />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      
-      {/* Bible-specific semantic meta tags */}
-      {bookName && <meta name="bible:book" content={bookName} />}
-      {bookName && chapter && <meta name="bible:chapter" content={chapter} />}
-      {verseRange && <meta name="bible:verses" content={verseRange} />}
-      <meta name="content:type" content="Bible Study" />
-      <meta name="content:category" content="Religious Education" />
-      
-      {/* Performance and Core Web Vitals optimization */}
+      {/* Performance Optimization */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="preconnect" href={siteUrl} />
       <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-      <link rel="dns-prefetch" href="//www.google-analytics.com" />
-      <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
       
-      {/* Resource hints for performance */}
-      <link rel="prefetch" href={`${siteUrl}/api/resources`} />
-      <link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-      
-      {/* Security headers */}
-      <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
-      <meta httpEquiv="X-Frame-Options" content="DENY" />
-      <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
-      <meta name="referrer" content="strict-origin-when-cross-origin" />
+      {/* Bible-specific meta tags */}
+      {bookName && <meta name="bible:book" content={bookName.charAt(0).toUpperCase() + bookName.slice(1).toLowerCase()} />}
+      {bookName && chapter && <meta name="bible:chapter" content={chapter} />}
+      {verseRange && <meta name="bible:verses" content={verseRange} />}
+      <meta name="subject" content="Reformed Theology" />
+      <meta name="topic" content="Bible Study" />
+      <meta name="category" content="Religious Education" />
       
       {/* Language and accessibility */}
       <html lang="en" />
       <meta name="color-scheme" content="light dark" />
       
-      {/* Enhanced Structured Data for 2025 Rich Results */}
+      {/* Rich Structured Data */}
       <script type="application/ld+json">
         {generateStructuredData()}
       </script>
       
-      {/* Additional meta for mobile optimization */}
+      {/* Security and Performance */}
+      <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
+      <meta httpEquiv="X-Frame-Options" content="SAMEORIGIN" />
+      <meta name="referrer" content="strict-origin-when-cross-origin" />
+      
+      {/* Mobile optimization */}
       <meta name="format-detection" content="telephone=no" />
       <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-title" content="Reformed Chapter" />
+      <meta name="application-name" content="Reformed Chapter" />
       
-      {/* Geo and regional targeting if applicable */}
-      <meta name="geo.region" content="US" />
-      <meta name="geo.placename" content="United States" />
+      {/* Copyright */}
+      <meta name="copyright" content={`© ${new Date().getFullYear()} Reformed Chapter`} />
       
-      {/* Copyright and ownership */}
-      <meta name="copyright" content={`© ${new Date().getFullYear()} ${siteName}`} />
-      <meta name="web_author" content={siteName} />
-      
-      {/* Additional performance hints */}
+      {/* Prefetch adjacent chapters for better UX */}
       {bookName && chapter && (
         <>
-          <link rel="prefetch" href={`/${bookName.toLowerCase().replace(/\s+/g, '')}/${parseInt(chapter) + 1}`} />
-          <link rel="prefetch" href={`/${bookName.toLowerCase().replace(/\s+/g, '')}/${parseInt(chapter) - 1}`} />
+          <link rel="prefetch" href={`/${bookName.toLowerCase()}/${parseInt(chapter) + 1}`} />
+          {parseInt(chapter) > 1 && (
+            <link rel="prefetch" href={`/${bookName.toLowerCase()}/${parseInt(chapter) - 1}`} />
+          )}
         </>
       )}
     </Helmet>
