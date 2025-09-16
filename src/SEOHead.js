@@ -6,7 +6,7 @@ const SEOHead = ({
   title, 
   description, 
   canonicalUrl,
-  ogImage = '/og-image.jpg',
+  ogImage = '/favicon.png',
   bookName,
   chapter,
   resourceCount = 0,
@@ -22,12 +22,27 @@ const SEOHead = ({
   const siteUrl = "https://reformedchapter.com";
   const defaultDescription = "Discover 10,000+ Reformed sermons, commentaries, and devotionals. Deepen your Bible study with trusted Reformed theology resources and Scripture insights.";
   
+  // Helper function to format book name for display (preserves spaces and numbers)
+  const formatBookNameForDisplay = (book) => {
+    if (!book) return '';
+    return book.charAt(0).toUpperCase() + book.slice(1).toLowerCase();
+  };
+
+  // Helper function to format book name for URLs (handles spaces and special characters)
+  const formatBookNameForUrl = (book) => {
+    if (!book) return '';
+    // Convert to proper case first
+    const properCase = book.charAt(0).toUpperCase() + book.slice(1).toLowerCase();
+    // Replace spaces with + for Bible Gateway URLs
+    return properCase.replace(/\s+/g, '+');
+  };
+
   // Clean and optimize title generation
   const generateTitle = () => {
     if (title) return title;
     
     if (bookName && chapter) {
-      const cleanBook = bookName.charAt(0).toUpperCase() + bookName.slice(1).toLowerCase();
+      const cleanBook = formatBookNameForDisplay(bookName);
       const chapterNum = chapter.toString();
       
       if (resourceCount > 0) {
@@ -45,15 +60,15 @@ const SEOHead = ({
     if (description) return description;
     
     if (bookName && chapter) {
-      const cleanBook = bookName.charAt(0).toUpperCase() + bookName.slice(1).toLowerCase();
+      const cleanBook = formatBookNameForDisplay(bookName);
       const chapterNum = chapter.toString();
       const verseText = verseRange ? ` verses ${verseRange}` : '';
       
       if (resourceCount > 0) {
-        return `Study ${cleanBook} ${chapterNum}${verseText} with ${resourceCount}+ Reformed commentaries, sermons, and devotionals. Trusted Reformed theology resources for pastors, teachers, and Bible students.`;
+        return `Discover profound insights on ${cleanBook} ${chapterNum}${verseText} with ${resourceCount}+ carefully curated Reformed commentaries, expository sermons, and devotional studies. Perfect for sermon preparation, Bible study groups, and personal spiritual growth.`;
       }
       
-      return `Explore ${cleanBook} Chapter ${chapterNum}${verseText} through Reformed theology lens. Access trusted commentaries, sermons, and study resources from Reformed scholars and pastors.`;
+      return `Unlock the theological treasures of ${cleanBook} Chapter ${chapterNum}${verseText} with expert Reformed commentary, powerful sermons, and practical Bible study tools. Deepen your understanding with resources from trusted Reformed scholars.`;
     }
     
     return defaultDescription;
@@ -67,7 +82,8 @@ const SEOHead = ({
     
     // Main Article/Chapter Schema
     if (bookName && chapter) {
-      const cleanBook = bookName.charAt(0).toUpperCase() + bookName.slice(1).toLowerCase();
+      const cleanBook = formatBookNameForDisplay(bookName);
+      const urlFormattedBook = formatBookNameForUrl(bookName);
       
       const articleSchema = {
         "@context": "https://schema.org",
@@ -111,8 +127,8 @@ const SEOHead = ({
           "name": `${cleanBook} Chapter ${chapter}`,
           "description": `Reformed Bible study and commentary for ${cleanBook} Chapter ${chapter}`,
           "sameAs": [
-            `https://www.biblegateway.com/passage/?search=${encodeURIComponent(cleanBook + ' ' + chapter)}`,
-            `https://www.esv.org/${cleanBook.toLowerCase()}+${chapter}/`
+            `https://www.biblegateway.com/passage/?search=${encodeURIComponent(urlFormattedBook + ' ' + chapter)}`,
+            `https://www.esv.org/${urlFormattedBook.toLowerCase().replace(/\+/g, '')}+${chapter}/`
           ]
         },
         "breadcrumb": {
@@ -327,7 +343,7 @@ const SEOHead = ({
       <link rel="dns-prefetch" href="//fonts.googleapis.com" />
       
       {/* Bible-specific meta tags */}
-      {bookName && <meta name="bible:book" content={bookName.charAt(0).toUpperCase() + bookName.slice(1).toLowerCase()} />}
+      {bookName && <meta name="bible:book" content={formatBookNameForDisplay(bookName)} />}
       {bookName && chapter && <meta name="bible:chapter" content={chapter} />}
       {verseRange && <meta name="bible:verses" content={verseRange} />}
       <meta name="subject" content="Reformed Theology" />
