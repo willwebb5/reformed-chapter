@@ -46,10 +46,10 @@ const SEOHead = ({
       const chapterNum = chapter.toString();
       
       if (resourceCount > 0) {
-        return `${cleanBook} ${chapterNum} Commentary & Sermons | ${resourceCount}+ Reformed Resources | Reformed Chapter`;
-      }
-      
-      return `${cleanBook} Chapter ${chapterNum} Bible Study | Reformed Commentary & Sermons | Reformed Chapter`;
+      return `${cleanBook} ${chapterNum} | ${resourceCount}+ Reformed Commentaries, Sermons & Bible Study Resources | Reformed Chapter`;
+    }
+
+    return `${cleanBook} Chapter ${chapterNum} | Reformed Bible Study Resource Hub | Reformed Chapter`;
     }
     
     return `Reformed Chapter | 10,000+ Reformed Sermons, Commentaries & Bible Study Resources`;

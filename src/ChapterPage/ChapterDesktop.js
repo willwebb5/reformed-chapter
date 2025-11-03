@@ -35,14 +35,12 @@ function ChapterDesktop() {
     sermons: [],
     commentaries: [],
     devotionals: [],
-    books: [],
     videos: [],
   });
   const [secondaryResources, setSecondaryResources] = useState({
     sermons: [],
     commentaries: [],
     devotionals: [],
-    books: [],
     videos: [],
   });
 
@@ -100,12 +98,11 @@ function ChapterDesktop() {
         )
         .map(processResource);
 
-      // Group by type
+      // Group by type (removed books)
       const groupResources = (items) => ({
         sermons: items.filter((r) => normalize(r.type) === "sermon"),
         commentaries: items.filter((r) => normalize(r.type) === "commentary"),
         devotionals: items.filter((r) => normalize(r.type) === "devotional"),
-        books: items.filter((r) => normalize(r.type) === "book"),
         videos: items.filter((r) => normalize(r.type) === "video"),
       });
 
@@ -691,6 +688,8 @@ function ChapterDesktop() {
           />
 
           {Object.keys(typeLabels).map((typeKey) => {
+            // Skip books section
+            if (typeKey === "books") return null;
             if (!filters.types.has(typeKey)) return null;
 
             return (
