@@ -152,7 +152,23 @@ export default function SubmitResource() {
   return (
     <div style={{ padding: "4rem 2rem 2rem", textAlign: "center", backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
       <Header />
-      <h2 style={{ color: "#000", marginBottom: "2rem" }}>Submit a New Resource</h2>
+      <h2 style={{ color: "#000", marginBottom: "1rem" }}>Submit a New Resource</h2>
+      
+      <div style={{
+        maxWidth: "600px",
+        margin: "0 auto 2rem",
+        padding: "1rem 1.5rem",
+        backgroundColor: "#e8f4f8",
+        border: "1px solid #b3d9ff",
+        borderRadius: "8px",
+        color: "#004080",
+        lineHeight: "1.6"
+      }}>
+        <p style={{ margin: 0 }}>
+          Want to help build our library of resources? Submit sermons, commentaries, devotionals and more below!
+        </p>
+      </div>
+
       <form
         onSubmit={handleSubmit}
         style={{
@@ -250,35 +266,34 @@ export default function SubmitResource() {
         </label>
 
         <label style={{ color: "#111", fontWeight: 500, display: "block", marginTop: 12 }}>
-  Price (optional):
-</label>
-<div style={{ display: "flex", gap: "16px", marginTop: 4 }}>
-  <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-    <input
-      type="radio"
-      name="price"
-      value="Free"
-      checked={formData.price === "Free"}
-      onChange={handleChange}
-    />
-    Free
-  </label>
+          Price (optional):
+        </label>
+        <div style={{ display: "flex", gap: "16px", marginTop: 4 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <input
+              type="radio"
+              name="price"
+              value="Free"
+              checked={formData.price === "Free"}
+              onChange={handleChange}
+            />
+            Free
+          </label>
 
-  <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-    <input
-      type="radio"
-      name="price"
-      value="Paid"
-      checked={formData.price === "Paid"}
-      onChange={handleChange}
-    />
-    Paid
-  </label>
-</div>
-
+          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <input
+              type="radio"
+              name="price"
+              value="Paid"
+              checked={formData.price === "Paid"}
+              onChange={handleChange}
+            />
+            Paid
+          </label>
+        </div>
 
         <label style={{ color: "#111", fontWeight: 500 }}>
-          Published Year :
+          Published Year:
           <input 
             type="number" 
             name="published_year" 
