@@ -7,6 +7,7 @@ import LoadingScreen from "../LoadingScreen";
 import SortFilter from "../SortFilter";
 import { supabase } from "../SupaBaseInfo";
 import Intro from "../Intro";
+
 import {
   typeLabels,
   bibleBooks,
@@ -15,6 +16,7 @@ import {
   bookToUrl,
 } from "../Constants";
 import { parseSecondaryScripture } from "../Logic";
+
 
 function ChapterDesktop() {
   const { book, chapter } = useParams();
@@ -61,7 +63,10 @@ function ChapterDesktop() {
     setError("");
 
     try {
-      const { data, error } = await supabase.from("resources").select("*");
+      const { data, error } = await supabase
+        .from("resources")
+        .select("*")
+        .range(0, 10000);  // Fetch up to 10,000 rows
       if (error) throw error;
 
       // Extract authors
@@ -239,21 +244,18 @@ function ChapterDesktop() {
           e.currentTarget.style.transform = "translateY(0)";
         }}
       >
-        {image && (
-          <img
-            src={image}
-            alt={title}
-            style={{
-              width: "auto",
-              height: "100px",
-              objectFit: "scale-down",
-              borderRadius: "8px",
-              marginRight: "1rem",
-              display: "flex",
-              alignItems: "center",
-            }}
-          />
-        )}
+        <img
+          src={image || '/MustardSeed.png'}
+          alt={title}
+          onError={(e) => { e.target.src = '/MustardSeed.png'; }}
+          style={{
+            width: "auto",
+            height: "100px",
+            objectFit: "scale-down",
+            borderRadius: "8px",
+            marginRight: "1rem",
+          }}
+        />
 
         <div style={{ flex: 1, display: "flex", gap: "1rem" }}>
           <div style={{ 

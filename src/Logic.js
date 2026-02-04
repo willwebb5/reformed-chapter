@@ -21,7 +21,7 @@ export function normalizeBookName(name) {
 
 // Parse secondary scripture references
 export function parseSecondaryScripture(secondaryScripture, currentBook, currentChapter) {
-  if (!secondaryScripture) return false;
+  if (!secondaryScripture) return true;
   
   console.log(`\n--- Parsing secondary scripture ---`);
   console.log(`Input: "${secondaryScripture}"`);

@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "./Header/Header";
 import Footer from "./Footer/Footer";
-import mustardSeedLogo from "./MustardSeed.png";
+
 
 // Mobile detection hook
 function useIsMobile(breakpoint = 768) {
@@ -154,7 +154,7 @@ export default function AboutUs() {
           </p>
           <div style={{ textAlign: "center", marginTop: "0.5rem" }}>
             <img
-              src={mustardSeedLogo}
+              src={'/MustardSeed.png'}
               alt="Mustard Seed Logo"
               style={{ maxWidth: isMobile ? "70px" : "100px", height: "auto" }}
             />
