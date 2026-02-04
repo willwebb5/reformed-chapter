@@ -70,7 +70,7 @@ function ChapterDesktop() {
       if (error) throw error;
       console.log("Total rows fetched:", data.length);  // ADD THIS LINE
       console.log("Sample IDs:", data.slice(0, 5).map(r => r.id));  // ADD THIS LINE
-      console.log("Last IDs:", data.slice(-5).map(r => r.id));  // ADD THIS LINE
+      console.log("Last IDs:", data.slice(-6).map(r => r.id));  // ADD THIS LINE
 
       // Extract authors
       const uniqueAuthors = new Set();
