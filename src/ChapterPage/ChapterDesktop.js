@@ -65,12 +65,11 @@ function ChapterDesktop() {
     try {
       const { data, error } = await supabase
         .from("resources")
-        .select("*")
-        .range(0, 1000000);  // Fetch up to 1000000 rows
+        .select("*");
       if (error) throw error;
-      console.log("Total rows fetched:", data.length);  // ADD THIS LINE
-      console.log("Sample IDs:", data.slice(0, 5).map(r => r.id));  // ADD THIS LINE
-      console.log("Last IDs:", data.slice(-6).map(r => r.id));  // ADD THIS LINE
+      console.log("Total rows fetched:", data.length);
+      console.log("Sample IDs:", data.slice(0, 5).map(r => r.id));
+      console.log("Last IDs:", data.slice(-6).map(r => r.id));
 
       // Extract authors
       const uniqueAuthors = new Set();
