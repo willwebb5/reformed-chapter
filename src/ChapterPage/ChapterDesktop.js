@@ -63,13 +63,37 @@ function ChapterDesktop() {
     setError("");
 
     try {
-      const { data, error } = await supabase
-        .from("resources")
-        .select("*");
-      if (error) throw error;
-      console.log("Total rows fetched:", data.length);
-      console.log("Sample IDs:", data.slice(0, 5).map(r => r.id));
-      console.log("Last IDs:", data.slice(-6).map(r => r.id));
+      const BATCH_SIZE = 1000;
+      let allData = [];
+      let from = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from("resources")
+          .select("*")
+          .range(from, from + BATCH_SIZE - 1);
+        
+        if (error) throw error;
+        
+        if (data.length === 0) {
+          hasMore = false;
+        } else {
+          allData = [...allData, ...data];
+          from += BATCH_SIZE;
+          
+          if (data.length < BATCH_SIZE) {
+            hasMore = false;
+          }
+        }
+      }
+
+      console.log("Total rows fetched:", allData.length);
+      console.log("Sample IDs:", allData.slice(0, 5).map(r => r.id));
+      console.log("Last IDs:", allData.slice(-6).map(r => r.id));
+      
+      // Use allData instead of data from here on
+      const data = allData;
 
       // Extract authors
       const uniqueAuthors = new Set();
