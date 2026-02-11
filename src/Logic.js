@@ -31,22 +31,22 @@ export function parseSecondaryScripture(secondaryScripture, currentBook, current
   const mainReferences = secondaryScripture.split(';').map(ref => ref.trim());
   
   for (let mainRef of mainReferences) {
-    console.log(`  Checking main reference: "${mainRef}"`);
+    //console.log(`  Checking main reference: "${mainRef}"`);
     
     // Split by commas for sub-references
     const subReferences = mainRef.split(',').map(ref => ref.trim());
     
     for (let ref of subReferences) {
-      console.log(`    Checking sub-reference: "${ref}"`);
+      //console.log(`    Checking sub-reference: "${ref}"`);
       
       // Special case for "Job (varied chapters)"
       if (ref.includes('(varied chapters)')) {
         const bookMatch = ref.match(/^([A-Za-z0-9\s]+)\s*\(/);
         if (bookMatch) {
           const bookName = bookMatch[1].trim();
-          console.log(`      Special case - Book: "${bookName}"`);
+          //console.log(`      Special case - Book: "${bookName}"`);
           if (normalizeBookName(bookName) === normalizeBookName(currentBook)) {
-            console.log(`      ✓ Match found (varied chapters)!`);
+            //console.log(`      ✓ Match found (varied chapters)!`);
             return true;
           }
         }
@@ -60,11 +60,11 @@ export function parseSecondaryScripture(secondaryScripture, currentBook, current
         const [, bookName, startChapter, , , endChapter] = match;
         const cleanBook = bookName.trim();
         
-        console.log(`      Parsed: Book="${cleanBook}", Chapter=${startChapter}`);
+        //console.log(`      Parsed: Book="${cleanBook}", Chapter=${startChapter}`);
         
         // Check if book matches
         if (normalizeBookName(cleanBook) === normalizeBookName(currentBook)) {
-          console.log(`      Book matches!`);
+          //console.log(`      Book matches!`);
           
           const chapterStart = parseInt(startChapter);
           let chapterEnd = chapterStart;
@@ -74,20 +74,20 @@ export function parseSecondaryScripture(secondaryScripture, currentBook, current
             chapterEnd = parseInt(endChapter);
           }
           
-          console.log(`      Chapter range: ${chapterStart} to ${chapterEnd}`);
-          console.log(`      Current chapter ${currentChapter} in range? ${currentChapter >= chapterStart && currentChapter <= chapterEnd}`);
+          //console.log(`      Chapter range: ${chapterStart} to ${chapterEnd}`);
+          //console.log(`      Current chapter ${currentChapter} in range? ${currentChapter >= chapterStart && currentChapter <= chapterEnd}`);
           
           if (currentChapter >= chapterStart && currentChapter <= chapterEnd) {
-            console.log(`      ✓ Match found!`);
+            //console.log(`      ✓ Match found!`);
             return true;
           }
         }
       } else {
-        console.log(`      No regex match for: "${ref}"`);
+        //console.log(`      No regex match for: "${ref}"`);
       }
     }
   }
   
-  console.log(`    No matches found for any references`);
+  //console.log(`    No matches found for any references`);
   return false;
 };
