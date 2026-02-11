@@ -23,9 +23,9 @@ export function normalizeBookName(name) {
 export function parseSecondaryScripture(secondaryScripture, currentBook, currentChapter) {
   if (!secondaryScripture) return true;
   
-  console.log(`\n--- Parsing secondary scripture ---`);
-  console.log(`Input: "${secondaryScripture}"`);
-  console.log(`Looking for: ${currentBook} chapter ${currentChapter}`);
+  //console.log(`\n--- Parsing secondary scripture ---`);
+  //console.log(`Input: "${secondaryScripture}"`);
+  //console.log(`Looking for: ${currentBook} chapter ${currentChapter}`);
   
   // Split by semicolons first, then by commas
   const mainReferences = secondaryScripture.split(';').map(ref => ref.trim());
@@ -57,7 +57,7 @@ export function parseSecondaryScripture(secondaryScripture, currentBook, current
       const match = ref.match(/^(\d*\s*[A-Za-z]+(?:\s+[A-Za-z]+)*)\s+(\d+)(?::(\d+)(?:[–-](\d+))?)?(?:[–-](\d+)(?::(\d+))?)?/);
       
       if (match) {
-        const [, bookName, startChapter, startVerse, endVerse, endChapter, endChapterVerse] = match;
+        const [, bookName, startChapter, , , endChapter] = match;
         const cleanBook = bookName.trim();
         
         console.log(`      Parsed: Book="${cleanBook}", Chapter=${startChapter}`);
